@@ -978,11 +978,11 @@ danger 提示块标签
 <!-- tab 样式预览 -->
 {% timeline 2020-07,blue %}
 <!-- timeline 2020-07-24  -->
-天气不错，适合出去约妹
+天气不错
 <!-- endtimeline -->
 
 <!-- timeline 2020-05-15 -->
-学习 SpringCloud Alibaba
+学习
 <!-- endtimeline -->
 {% endtimeline %}
 <!-- endtab -->
