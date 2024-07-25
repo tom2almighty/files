@@ -116,6 +116,7 @@ proxy-groups:
   - {name: 节点选择, type: select, proxies: [香港策略, 台湾策略, 日本策略, 狮城策略, 美国策略, 其他策略, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png}
   - {name: 手动切换, type: select, include-all: true, filter: *FilterAll, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Static.png}
   - {name: CDN, type: select, proxies: [香港策略, 台湾策略, 日本策略, 狮城策略, 美国策略, 其他策略, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Heart.png}
+  - {name: Emby, type: select, proxies: [香港策略, 台湾策略, 日本策略, 狮城策略, 美国策略, 其他策略, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Emby.png}
   - {name: 流媒体, type: select, proxies: [香港策略, 台湾策略, 日本策略, 狮城策略, 美国策略, 其他策略, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ForeignMedia.png}
   - {name: Telegram, type: select, proxies: [香港策略, 台湾策略, 日本策略, 狮城策略, 美国策略, 其他策略, 手动切换], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Telegram.png}
   - {name: AppleCDN, type: select, proxies: [DIRECT, 香港策略, 台湾策略, 日本策略, 狮城策略, 美国策略, 其他策略, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png}
@@ -180,6 +181,14 @@ rule-providers:
     interval: 43200
     url: https://ruleset.skk.moe/Clash/non_ip/cdn.txt
     path: ./sukkaw_ruleset/cdn_non_ip.txt
+
+  # Emby
+  emby:
+    type: http
+    behavior: classical
+    format: text
+    interval: 43200
+    url: https://raw.githubusercontent.com/tom2almighty/files/master/emby.txt
 
   # 流媒体
   stream_non_ip:
@@ -371,6 +380,7 @@ rules:
   - RULE-SET,reject_domainset,REJECT
   - RULE-SET,cdn_domainset,CDN
   - RULE-SET,cdn_non_ip,CDN
+  - RULE-SET,emby,Emby
   - RULE-SET,stream_non_ip,流媒体
   - RULE-SET,ai_non_ip,AIGC
   - RULE-SET,telegram_non_ip,Telegram
