@@ -230,11 +230,11 @@ rule-providers:
   # Steam
   steam:
     type: http
-    behavior: domain
-    format: text
+    behavior: classical
+    format: yaml
     interval: 43200
-    url: https://ruleset.skk.moe/Clash/domainset/steam.txt
-    path: ./ruleset/steam.txt
+    url: https://gitlab.com/lodepuly/proxy_tool_resources/-/raw/master/rule/Clash/Steam/Steam.yaml
+    path: ./ruleset/Steam.yaml
 
   # Apple CN
   apple_cn_non_ip:
