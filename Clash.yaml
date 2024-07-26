@@ -89,6 +89,7 @@ proxy-providers:
    #   additional-prefix: "[ZJ] " # 为订阅节点添加机场名称前缀
 
 
+
 # 锚点 - 节点筛选组
 FilterHK: &FilterHK '(?=.*(🇭🇰|港|HK|(?i)Hong))^((?!(日|坡|狮|美)).)*$'
 FilterJP: &FilterJP '(?=.*(🇯🇵|(?<!尼)日|JP|(?i)Japan))^((?!(港|坡|狮|美)).)*$'
@@ -122,6 +123,7 @@ proxy-groups:
   - {name: AppleOther, type: select, proxies: [DIRECT, 香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png}
   - {name: MicrosoftCDN, type: select, proxies: [DIRECT, 香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Microsoft.png}
   - {name: MicrosoftOther, type: select, proxies: [DIRECT, 香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Microsoft.png}
+  - {name: 国外下载, type: select, proxies: [DIRECT, 香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Download.png}
   - {name: 兜底, type: select, proxies: [节点选择, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png}
   # 地区策略 
   - {name: 香港策略, <<: *FallBack, filter: *FilterHK, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png}
@@ -228,7 +230,7 @@ rule-providers:
   # Steam
   steam:
     type: http
-    behavior: classical
+    behavior: domain
     format: text
     interval: 43200
     url: https://ruleset.skk.moe/Clash/domainset/steam.txt
@@ -277,7 +279,7 @@ rule-providers:
     format: text
     interval: 43200
     url: https://ruleset.skk.moe/Clash/non_ip/microsoft.txt
-    path: ./ruleset/microsoft_non_ip.txt
+    path: ./ruleset/microsoft.txt
 
   # 国内网站
   domestic_non_ip:
@@ -393,10 +395,10 @@ rules:
 # Apple
   - RULE-SET,apple_cn_non_ip,DIRECT
   - RULE-SET,apple_cdn,AppleCDN
-  - RULE-SET,apple_services,AppleOther
+  - RULE-SET,apple_other,AppleOther
 # Microsoft
   - RULE-SET,microsoft_cdn_non_ip,MicrosoftCDN
-  - RULE-SET,microsoft_non_ip,MicrosoftOther
+  - RULE-SET,microsoft_other,MicrosoftOther
 # 国内网站
   - RULE-SET,domestic_non_ip,DIRECT
   - RULE-SET,direct_non_ip,DIRECT
