@@ -205,7 +205,7 @@ rule-providers:
     << : *Classical
     format: text
     interval: 43200
-    url: https://raw.githubusercontent.com/tom2almighty/files/master/emby.txt
+    url: https://raw.githubusercontent.com/tom2almighty/files/main/emby.txt
     path: ./ruleset/emby.txt
 
 # Spotify
