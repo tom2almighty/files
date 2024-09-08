@@ -180,7 +180,7 @@ rule-providers:
 # AIGC
   ai:
     << : *Classical
-    url: https://ruleset.skk.moe/List/non_ip/ai.conf
+    url: https://ruleset.skk.moe/Clash/non_ip/ai.txt
     format: text
 
 # Steam
