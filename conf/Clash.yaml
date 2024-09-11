@@ -1,7 +1,13 @@
-# 根据 Sukka Ruleset 规则及可莉🅥配置(https://gitlab.com/lodepuly/vpn_tool/-/tree/master/Tool/Clash/Config)修改
-# 时间: 20240620
-# 适用版本：所有使用 mihomo 核心的程序
+# 适用于 mihomo core 的 Clash 规则
+# 作者: Tom Almighty
+# 时间: 2024-09-11
+# 参考:
+# - https://blog.skk.moe/post/i-have-my-unique-surge-setup/
+# - https://gitlab.com/lodepuly/vpn_tool/-/tree/master/Tool/Clash/Config
+# - https://github.com/yyhhyyyyyy/selfproxy
+# - https://github.com/Orz-3/QuantumultX
 
+# Clash 配置文件
 port: 7890
 socks-port: 7898
 mixed-port: 7897
@@ -19,7 +25,7 @@ global-client-fingerprint: chrome
 allow-lan: true
 mode: rule
 log-level: info
-ipv6: true
+ipv6: false
 udp: true
 
 external-controller: 127.0.0.1:9090
@@ -53,7 +59,8 @@ sniffer:
     - +.v2ex.com
 
   skip-domain:
-    - Mijia Cloud
+    - "Mijia Cloud"
+    - "+.push.apple.com"
 
 tun:
   enable: true
@@ -62,26 +69,32 @@ tun:
     - any:53
   auto-route: true
   auto-detect-interface: true
+  strict-route: true
 
 dns:
   enable: true
   listen: 0.0.0.0:1053
-  ipv6: true
+  ipv6: false
+  prefer-h3: true
+  respect-rules: true
   enhanced-mode: fake-ip
   fake-ip-range: 28.0.0.1/8
   fake-ip-filter:
     - "*"
     - +.lan
-  default-nameserver:
+  nameserver:
+    - system
     - 223.5.5.5
     - 223.6.6.6
-  nameserver:
     - https://223.5.5.5/dns-query#h3=true
-    - https://223.6.6.6/dns-query#h3=true
+  proxy-server-nameserver:
+    - https://120.53.53.53/dns-query
+    - https://223.5.5.5/dns-query
 
 
-# 锚点 - 节点订阅的参数 [每小时更新一次订阅节点，每 6 秒一次健康检查]
-NodeParam: &NodeParam {type: http, interval: 86400, health-check: {enable: true, url: 'http://www.msftconnecttest.com/connecttest.txt', interval: 6}}
+
+# 锚点 - 节点订阅的参数 [每小时更新一次订阅节点，每 60 秒一次健康检查]
+NodeParam: &NodeParam {type: http, interval: 86400, health-check: {enable: true, url: 'http://connectivitycheck.platform.hicloud.com/generate_204', interval: 60}}
 
 # 锚点 - 节点订阅
 proxy-providers: 
@@ -99,188 +112,281 @@ FilterHK: &FilterHK '(?=.*(🇭🇰|港|HK|(?i)Hong))^((?!(日|坡|狮|美)).)*$
 FilterJP: &FilterJP '(?=.*(🇯🇵|(?<!尼)日|JP|(?i)Japan))^((?!(港|坡|狮|美)).)*$'
 FilterSG: &FilterSG '(?=.*(🇸🇬|坡|狮|獅|SG|(?i)Singapore))^((?!(港|日|美)).)*$'
 FilterUS: &FilterUS '(?=.*(🇺🇸|美|US|(?i)States|American))^((?!(港|日|坡|狮)).)*$'
-FilterAll: &FilterAll '^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}|\d+G)))).*$'
 FilterOther: &FilterOther '^((?!(🇭🇰|🇸🇬|🇺🇸|🇯🇵|港|美|日|坡|狮|广告|剩余|官网|到期|流量|HK|US|JP|SG|Hong|Singapore|Japan|United)).)*$'
+FilterAll: &FilterAll '^(?=.*(.))(?!.*((?i)群|邀请|返利|循环|官网|客服|网站|网址|获取|订阅|流量|到期|机场|下次|版本|官址|备用|过期|已用|联系|邮箱|工单|贩卖|通知|倒卖|防止|国内|地址|频道|无法|说明|使用|提示|特别|访问|支持|教程|关注|更新|作者|加入|(\b(USE|USED|TOTAL|EXPIRE|EMAIL|Panel|Channel|Author)\b|(\d{4}-\d{2}-\d{2}|\d+G)))).*$'
 
 
-# 策略组参数锚点
+# 锚点 - 策略组参数
+Select: &Select {type: select, disable-udp: false, hidden: false, include-all: true}
 # 锚点 - 时延优选参数 [每 6 秒一次惰性健康检查，容差 20ms，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
-UrlTest: &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'http://www.msftconnecttest.com/connecttest.txt', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: false, include-all: true}
+UrlTest: &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'http://connectivitycheck.platform.hicloud.com/generate_204', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: false, include-all: true}
 # 锚点 - 故障转移参数 [每 6 秒一次惰性健康检查，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
-FallBack: &FallBack {type: fallback, interval: 6, lazy: true, url: 'http://www.msftconnecttest.com/connecttest.txt', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: false, include-all: true}
+FallBack: &FallBack {type: fallback, interval: 6, lazy: true, url: 'http://connectivitycheck.platform.hicloud.com/generate_204', disable-udp: false, timeout: 2000, max-failed-times: 3, hidden: false, include-all: true}
 # 锚点 - 负载均衡参数 [每 6 秒一次惰性健康检查，时延超过 2 秒判定为失败，失败 3 次则自动触发健康检查]
-LoadBalance: &LoadBalance {type: load-balance, interval: 6, lazy: true, url: 'http://www.msftconnecttest.com/connecttest.txt', disable-udp: false, strategy: consistent-hashing, timeout: 2000, max-failed-times: 3, hidden: false, include-all: true}
-# 锚点 - 规则参数 [每小时更新一次订阅规则]
+LoadBalance: &LoadBalance {type: load-balance, interval: 6, lazy: true, url: 'http://connectivitycheck.platform.hicloud.com/generate_204', disable-udp: false, strategy: consistent-hashing, timeout: 2000, max-failed-times: 3, hidden: false, include-all: true}
+
+# 锚点 - 规则参数
 Classical: &Classical {type: http, behavior: classical, interval: 86400}
 Domain: &Domain {type: http, behavior: domain, interval: 86400}
 IP: &IP {type: http, behavior: ipcidr, interval: 86400}
 
 # 策略组
 proxy-groups: 
-  - {name: 节点选择, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png}
-  - {name: AIGC, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/OpenAI.png}
-  - {name: Steam, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Steam.png}
-  - {name: Telegram, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Telegram.png}
-  - {name: Emby, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Emby.png}
-  - {name: Spotify, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Spotify.png}
-  - {name: 流媒体, type: select, proxies: [香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ForeignMedia.png}
-  - {name: Microsoft, type: select, proxies: [DIRECT, 香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Microsoft.png}
-  - {name: 国外下载, type: select, proxies: [DIRECT, 香港策略, 日本策略, 狮城策略, 美国策略, 其他策略, 故障转移, 手动切换], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Download.png}
-  - {name: 兜底, type: select, proxies: [节点选择, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Final.png}
+  - {name: Proxy, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png}
+  - {name: AIGC, type: select, proxies: [United States, Hong Kong, Japan, Singapore, Others, DIRECT], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/OpenAI.png}
+  - {name: Telegram, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Telegram.png}
+  - {name: Emby, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Emby.png}
+  - {name: Spotify, type: select, proxies: [DIRECT, Hong Kong, Japan, Singapore, United States, Others], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Spotify.png}
+  - {name: Streaming, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ForeignMedia.png}
+  - {name: Apple, type: select, proxies: [DIRECT, Hong Kong, Japan, Singapore, United States, Others], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Apple.png}
+  - {name: Microsoft, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Microsoft.png}
+  - {name: Download, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Download.png}
   # 地区策略 
-  - {name: 香港策略, <<: *FallBack, filter: *FilterHK, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png}
-  - {name: 日本策略, <<: *FallBack, filter: *FilterJP, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png}
-  - {name: 狮城策略, <<: *FallBack, filter: *FilterSG, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png}
-  - {name: 美国策略, <<: *FallBack, filter: *FilterUS, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png}
-  - {name: 其他策略, <<: *FallBack, filter: *FilterOther, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/World_Map.png}
-  - {name: 故障转移, <<: *FallBack, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Available_1.png}
-  - {name: 手动切换, type: select, include-all: true, filter: *FilterAll, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Static.png}
+  - {name: Hong Kong, <<: *FallBack, filter: *FilterHK, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png}
+  - {name: Japan, <<: *FallBack, filter: *FilterJP, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png}
+  - {name: Singapore, <<: *FallBack, filter: *FilterSG, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png}
+  - {name: United States, <<: *FallBack, filter: *FilterUS, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png}
+  - {name: Others, <<: *Select, filter: *FilterOther, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/World_Map.png}
+  - {name: All, type: select, include-all: true, filter: *FilterAll, icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Static.png}
+
 
 
 
 
 # 订阅规则
 rule-providers:
-##### 域名规则
-# Lan
-  private:
+# 广告拦截
+  awavenue_ad_rule:
     <<: *Domain
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
+    url: https://raw.githubusercontent.com/TG-Twilight/AWAvenue-Ads-Rule/main/Filters/AWAvenue-Ads-Rule-Clash.yaml
+    path: ./rules/awavenue_ad_rule.yaml
+
+  reject_non_ip_no_drop:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/reject-no-drop.txt
+    path: ./rules/reject_non_ip_no_drop.txt
+    format: text
+
+  reject_non_ip_drop:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/reject-drop.txt
+    path: ./rules/reject_non_ip_drop.txt
+    format: text
+
+  reject_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/reject.txt
+    path: ./rules/reject_non_ip.txt
+    format: text
+
+  reject_domainset:
+    <<: *Domain
+    url: https://ruleset.skk.moe/Clash/domainset/reject.txt
+    path: ./rules/reject_domainset.txt
+    format: text
+
+  reject_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/ip/reject.txt
+    path: ./rules/reject_ip.txt
+    format: text
 
 # Steam CN
   steam_cn:
     <<: *Classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/SteamCN/SteamCN_No_Resolve.yaml
+    path: ./rules/steam_cn.yaml
   
 # China_Download_CDN
   download_cn:
     <<: *Classical
     url: https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Tool/Clash/Rule/ChinaDownloadCDN.yaml
+    path: ./rules/download_cn.yaml
 
 # Apple
-  icloud:
-    << : *Domain
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt
+  apple_cn_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/apple_cn.txt
+    path: ./rulesapple_cn_non_ip.txt
+    format: text
 
-  apple:
-    << : *Domain
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt
+  apple_cdn:
+    <<: *Domain
+    url: https://ruleset.skk.moe/Clash/domainset/apple_cdn.txt
+    path: ./rules/apple_cdn.txt
+    format: text
+  
+  apple_services:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/apple_services.txt
+    path: ./rules/apple_services.txt
+    format: text
 
-# Microsfot
+# Microsoft
   microsoft_cdn:
     << : *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/microsoft_cdn.txt
+    path: ./rules/microsoft_cdn.txt
     format: text
 
-  microsoft_other:
+  microsoft:
     << : *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/microsoft.txt
+    path: ./rules/microsoft.txt
+    format: text
+
+# CDN
+  cdn_domainset:
+    <<: *Domain
+    url: https://ruleset.skk.moe/Clash/domainset/cdn.txt
+    path: ./rules/cdn_domainset.txt
+    format: text
+
+  cdn_non_ip:
+    <<: *Domain
+    url: https://ruleset.skk.moe/Clash/non_ip/cdn.txt
+    path: ./rules/cdn_non_ip.txt
+    format: text
+
+# 软件更新、操作系统等大文件下载
+  download_domainset:
+    <<: *Domain
+    url: https://ruleset.skk.moe/Clash/domainset/download.txt
+    path: ./rules/download_domainset.txt
+    format: text
+
+  download_non_ip:
+    <<: *Domain
+    url: https://ruleset.skk.moe/Clash/non_ip/download.txt
+    path: ./rules/download_non_ip.txt
     format: text
 
 # AIGC
   ai:
     << : *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/ai.txt
+    path: ./rules/ai.txt
     format: text
 
 # Steam
   steam:
     << : *Classical
     url: https://gitlab.com/lodepuly/proxy_tool_resources/-/raw/master/rule/Clash/Steam/Steam.yaml
+    path: ./rules/steam.yaml
 
 # Telegram
   telegram_non_ip:
     << : *Classical
-    format: text
     url: https://ruleset.skk.moe/Clash/non_ip/telegram.txt
+    path: ./rules/telegram_non_ip.txt
+    format: text
+
+  telegram_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/ip/telegram.txt
+    path: ./rules/telegram_ip.txt
+    format: text
 
 # Emby
   emby:
     << : *Classical
     url: https://raw.githubusercontent.com/tom2almighty/files/master/emby.txt
+    path: ./rules/emby.txt
     format: text
 
 # Spotify
   spotify:
     << : *Classical
     url: https://raw.githubusercontent.com/Centralmatrix3/Matrix-io/master/Clash/Ruleset/Spotify.yaml
+    path: ./rules/spotify.yaml
 
 # 流媒体
-  stream_domain:
+  streamimg_domain:
     << : *Domain
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_Domain.yaml
-
-# 国外下载
-  download_global:
-    << : *Classical
-    url: https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Tool/Clash/Rule/InternationalDownloadCDN.yaml
-
-# 国外网站
-  proxy:
-    << : *Domain
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
-
-# GFW
-  gfw:
-    << : *Domain
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt
-
-# 国内网站
-  direct:
-    << : *Domain
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
-
-################# IP 规则
-# 局域网(IP)
-  lancidr:
-    << : *IP
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt
-
-# 流媒体(IP)  
-  stream:
+    path: ./rules/streamimg_domain.yaml
+  streamimg:
     << : *Classical
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_No_Resolve.yaml
+    path: ./rules/streamimg.yaml
 
-# telegram(IP)
-  telegram_ip:
-    << : *Classical
+# 内网域名和局域网 IP
+  lan_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/lan.txt
+    path: ./rules/lan_non_ip.txt
     format: text
-    url: https://ruleset.skk.moe/Clash/ip/telegram.txt
+  lan_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/ip/lan.txt
+    path: ./rules/lan_ip.txt
+    format: text
 
-# CN(IP)
-  cncidr:
-    << : *IP
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
-
+# 国内域名
+  domestic_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/domestic.txt
+    path: ./rules/domestic_non_ip.txt
+    format: text
 # 直连程序
-  applications:
-    << : *Classical
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt
+  direct_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/direct.txt
+    path: ./rules/direct_non_ip.txt
+    format: text
+# 国内 IP 
+  china_ip:
+    <<: *IP
+    url: https://ruleset.skk.moe/Clash/ip/china_ip.txt
+    path: ./rules/china_ip.txt
+    format: text 
+  domestic_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/ip/domestic.txt
+    path: ./rules/domestic_ip.txt
+    format: text
+
+# 海外域名
+  global_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/global.txt
+    path: ./rules/global_non_ip.txt
+    format: text
+
 
 rules:
   # 域名规则
-  - RULE-SET,private,DIRECT
+  - RULE-SET,awavenue_ad_rule,REJECT
+  - RULE-SET,reject_non_ip_no_drop,REJECT
+  - RULE-SET,reject_non_ip_drop,REJECT-DROP
+  - RULE-SET,reject_non_ip,REJECT
+  - RULE-SET,reject_domainset,REJECT
   - RULE-SET,steam_cn,DIRECT
   - RULE-SET,download_cn,DIRECT
-  - RULE-SET,icloud,DIRECT
-  - RULE-SET,apple,DIRECT
+  - RULE-SET,apple_cn_non_ip,DIRECT
+  - RULE-SET,apple_cdn,DIRECT
   - RULE-SET,microsoft_cdn,DIRECT
-  - RULE-SET,microsoft_other,Microsoft
+  - RULE-SET,apple_services,Apple
+  - RULE-SET,microsoft,Microsoft
   - RULE-SET,ai,AIGC
-  - RULE-SET,steam,Steam
+  - RULE-SET,steam,Proxy
   - RULE-SET,telegram_non_ip,Telegram
   - RULE-SET,emby,Emby
   - RULE-SET,spotify,Spotify
-  - RULE-SET,stream_domain,流媒体
-  - RULE-SET,download_global,国外下载
-  - RULE-SET,proxy,节点选择
-  - RULE-SET,gfw,节点选择
-  - RULE-SET,direct,DIRECT
+  - RULE-SET,streamimg_domain,Streaming
+  - RULE-SET,cdn_domainset,Proxy
+  - RULE-SET,cdn_non_ip,Proxy
+  - RULE-SET,download_domainset,Download
+  - RULE-SET,download_non_ip,Download
+  - RULE-SET,lan_non_ip,DIRECT
+  - RULE-SET,domestic_non_ip,DIRECT
+  - RULE-SET,direct_non_ip,DIRECT
+  - RULE-SET,global_non_ip,Proxy
   # IP 规则
-  - RULE-SET,lancidr,DIRECT
-  - RULE-SET,stream,流媒体
+  - RULE-SET,reject_ip,REJECT
   - RULE-SET,telegram_ip,Telegram
-  - RULE-SET,cncidr,DIRECT
-  - RULE-SET,applications,DIRECT
-  - GEOIP,CN,DIRECT
-  - MATCH,兜底
+  - RULE-SET,streamimg,Streaming
+  - RULE-SET,lan_ip,DIRECT
+  - RULE-SET,china_ip,DIRECT
+  - RULE-SET,domestic_ip,DIRECT
+  - MATCH, Proxy
