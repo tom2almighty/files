@@ -12,7 +12,15 @@
 ```
 https://raw.githubusercontent.com/tom2almighty/files/main/conf/Surge.conf
 ```
-**Shadowsockets 配置**
+**Quantumult X 配置**
+```
+https://raw.githubusercontent.com/tom2almighty/files/main/conf/QuantumultX.conf
+```
+**Loon 配置**
+```
+https://raw.githubusercontent.com/tom2almighty/files/main/conf/Loon.conf
+```
+**Shadowsocket 配置**
 ```
 https://raw.githubusercontent.com/tom2almighty/files/main/conf/Shadowrocket.conf
 ```
