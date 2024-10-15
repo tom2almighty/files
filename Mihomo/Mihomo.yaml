@@ -235,7 +235,7 @@ rule-providers:
     format: text
 
   cdn_non_ip:
-    <<: *Domain
+    <<: *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/cdn.txt
     path: ./rules/cdn_non_ip.txt
     format: text
@@ -248,7 +248,7 @@ rule-providers:
     format: text
 
   download_non_ip:
-    <<: *Domain
+    <<: *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/download.txt
     path: ./rules/download_non_ip.txt
     format: text

@@ -233,7 +233,7 @@ rule-providers:
     format: text
 
   cdn_non_ip:
-    <<: *Domain
+    <<: *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/cdn.txt
     path: ./rules/cdn_non_ip.txt
     format: text
@@ -246,7 +246,7 @@ rule-providers:
     format: text
 
   download_non_ip:
-    <<: *Domain
+    <<: *Classical
     url: https://ruleset.skk.moe/Clash/non_ip/download.txt
     path: ./rules/download_non_ip.txt
     format: text
@@ -300,6 +300,13 @@ rule-providers:
     url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GlobalMedia/GlobalMedia_No_Resolve.yaml
     path: ./rules/streamimg.yaml
 
+# 海外域名
+  global_non_ip:
+    <<: *Classical
+    url: https://ruleset.skk.moe/Clash/non_ip/global.txt
+    path: ./rules/global_non_ip.txt
+    format: text
+
 # 内网域名和局域网 IP
   lan_non_ip:
     <<: *Classical
@@ -336,12 +343,7 @@ rule-providers:
     path: ./rules/domestic_ip.txt
     format: text
 
-# 海外域名
-  global_non_ip:
-    <<: *Classical
-    url: https://ruleset.skk.moe/Clash/non_ip/global.txt
-    path: ./rules/global_non_ip.txt
-    format: text
+
 
 
 rules:
