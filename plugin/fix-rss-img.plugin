@@ -1,8 +1,0 @@
-#!name = RSS 防盗链修复
-#!desc = 修复少数派 RSS 订阅图片不显示的问题
-
-[Rewrite]
-https://cdnfile\.sspai\.com/.* header-add referer https://sspai.com
-
-[MITM]
-hostname = cdnfile.sspai.com

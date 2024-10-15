@@ -8,33 +8,49 @@
 
 ## ⚙ 配置
 
-**Surge 配置**  
+### Surge 配置
+**完整版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/Surge.conf
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge.conf
 ```
-**Quantumult X 配置**
+**精简版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/QuantumultX.conf
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-mini.conf
 ```
-**Loon 配置**
+**最小配置**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/Loon.conf
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-developer.conf
 ```
-**Shadowsocket 配置**
+
+### Quantumult X 配置
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/Shadowrocket.conf
+https://raw.githubusercontent.com/tom2almighty/files/main/QuantumultX/QuantumultX.conf
 ```
-**Clash mihomo 配置**
+### Loon 配置
+**完整版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/Clash.yaml
+https://raw.githubusercontent.com/tom2almighty/files/main/Loon/Loon.conf
 ```
-**Subconverter Clash 配置**
+**精简版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/clash.ini
+https://raw.githubusercontent.com/tom2almighty/files/main/Loon/Loon-mini.conf
 ```
-**Subconverter Clash 精简配置**
+### Clash mihomo 配置
+**完整版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/conf/clash_mini.ini
+https://raw.githubusercontent.com/tom2almighty/files/Mihomo/Mihomo.yaml
+```
+**精简版**
+```
+https://raw.githubusercontent.com/tom2almighty/files/Mihomo/Mihomo-mini.yaml
+```
+### Subconverter Clash 配置
+```
+https://raw.githubusercontent.com/tom2almighty/files/main/Clash/clash.ini
+```
+### Subconverter Clash 精简配置
+```
+https://raw.githubusercontent.com/tom2almighty/files/main/Clash/clash_mini.ini
 ```
 
 ## 🛠 模块
@@ -42,9 +58,9 @@ https://raw.githubusercontent.com/tom2almighty/files/main/conf/clash_mini.ini
 ### Surge 模块
 **修复 VVebo 时间线**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/module/fix-vvebo.sgmodule
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/fix-vvebo.sgmodule
 ```
 **修复少数派 RSS 防盗链**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/module/fix-rss-img.sgmodule
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/fix-sspai-img.sgmodule
 ```

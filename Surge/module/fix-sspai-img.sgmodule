@@ -1,0 +1,11 @@
+#!name = RSS 防盗链修复
+#!desc = 修复少数派 RSS 订阅图片不显示的问题
+
+[Header Rewrite]
+^https?:\/\/cdnfile\.sspai\.com\/.+\.(jpg|jpeg|gif|png|webp) header-del Referer
+^https?:\/\/cdnfile\.sspai\.com\/.+\.(jpg|jpeg|gif|png|webp) header-add Referer "https://sspai.com/"
+^https?:\/\/cdnfile\.sspai\.com\/.+\.(jpg|jpeg|gif|png|webp) header-del Dnt
+^https?:\/\/cdnfile\.sspai\.com\/.+\.(jpg|jpeg|gif|png|webp) header-add Dnt 1
+
+[MITM]
+hostname = %APPEND% cdnfile.sspai.com
