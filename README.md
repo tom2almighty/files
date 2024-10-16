@@ -64,3 +64,7 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/fix-vvebo
 ```
 https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/fix-sspai-img.sgmodule
 ```
+**重定向**
+```
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/redirect.sgmodule
+```
