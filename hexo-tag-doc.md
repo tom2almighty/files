@@ -23,7 +23,7 @@ description: 自用的Hexo标签文档。
 本文档源码下载：
 
 {% btns rounded %}
-{% cell 下载源码, https://raw.githubusercontent.com/tom2almighty/files/master/hexo-tag-doc.md, fas fa-download %}
+{% cell 下载源码, https://raw.githubusercontent.com/tom2almighty/files/main/hexo-tag-doc.md, fas fa-download %}
 {% endbtns %}
 
 ## 安装
