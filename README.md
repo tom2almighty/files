@@ -38,11 +38,11 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Loon/Loon-mini.conf
 ### Clash mihomo 配置
 **完整版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/Mihomo/Mihomo.yaml
+https://raw.githubusercontent.com/tom2almighty/files/main/Mihomo/Mihomo.yaml
 ```
 **精简版**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/Mihomo/Mihomo-mini.yaml
+https://raw.githubusercontent.com/tom2almighty/files/main/Mihomo/Mihomo-mini.yaml
 ```
 ### Subconverter Clash 配置
 ```
