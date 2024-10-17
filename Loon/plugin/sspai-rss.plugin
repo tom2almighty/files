@@ -1,7 +1,7 @@
 #!name=RSS 防盗链修复
 #!desc=修复少数派 RSS 订阅图片不显示的问题
 #!icon=https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/52/36/f8/5236f83e-105a-f5fd-0cd6-02b623b4cf00/AppIcon-0-0-1x_U007epad-0-0-85-220.png/246x0w.webp
-#!keyword=工具
+#!tag=工具
 
 [Rewrite]
 ^https?:\/\/cdnfile\.sspai\.com\/.+\.(jpg|jpeg|gif|png|webp) header-del Referer
