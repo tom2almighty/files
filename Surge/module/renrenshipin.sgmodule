@@ -1,0 +1,10 @@
+#!name=人人视频
+#!desc=人人视频会员去广告 & 会员解锁 | 需登录
+#!category=解锁会员
+#!author=chxm1023
+
+[Script]
+renrenshipin = type=http-response, pattern=^https?:\/\/api\.(hujuvod\.com|qwapp\.top)\/(user\/personal\/information|app\/drama\/page), script-path=https://raw.githubusercontent.com/tom2almighty/files/main/Script/renrenshipin.js, requires-body=true, max-size=-1, timeout=60
+
+[MITM]
+hostname = %APPEND% api.hujuvod.com, api.qwapp.top
