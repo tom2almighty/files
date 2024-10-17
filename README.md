@@ -83,6 +83,11 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/sspai-rss
 https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/redirect.sgmodule
 ```
 
+**MOZE**
+```
+https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/moze.sgmodule
+```
+
 **人人视频** [chxm1023](https://t.me/chxm1023)
 ```
 https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/renrenshipin.sgmodule
@@ -93,7 +98,3 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/renrenshi
 https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/slidebox.sgmodule
 ```
 
-**MOZE** [chxm1023](https://t.me/chxm1023)
-```
-https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/moze.sgmodule
-```
