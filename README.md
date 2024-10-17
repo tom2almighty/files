@@ -24,22 +24,21 @@
 <tr>
 <td style="text-align:left">完整配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge.conf" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge.conf" target="_blank">点击导入</a></td>
+<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge.conf" target="_blank" title="点击导入">点击导入</a></td>
 </tr>
 <tr>
 <td style="text-align:left">精简配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-mini.conf" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-mini.conf">点击导入</a></td>
+<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-mini.conf" title="点击导入">点击导入</a></td>
 </tr>
 <tr>
 <td style="text-align:left">开发者推荐最小配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-developer.conf" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf">点击导入</a></td>
+<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf" title="点击导入">点击导入</a></td>
 </tr>
 </tbody>
 </table>
 
-<a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf" target="_blank">点击导入</a>
 
 
 ### 模块
