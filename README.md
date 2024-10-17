@@ -85,11 +85,11 @@
 </tbody>
 </table>
 
+[点击导入](surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf)
+
+
 
 ## Loon
-
-
-
 ### 配置
 
 
@@ -105,12 +105,12 @@
 <tr>
 <td style="text-align:left">完整配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/Loon.conf" target="_blank">长按复制</a></td>
-<td><a href="loon://import?sub=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2FLoon.conf">点击导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?sub=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2FLoon.conf">点击导入</a></td>
 </tr>
 <tr>
 <td style="text-align:left">精简配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/Loon-mini.conf" target="_blank">长按复制</a></td>
-<td><a href="loon://import?sub=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2FLoon-mini.conf">点击导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?sub=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2FLoon-mini.conf">点击导入</a></td>
 </tr>
 </tbody>
 </table>
@@ -131,32 +131,32 @@
 <tr>
 <td>VVebo 时间线修复</td>
 <td><a href="https://raw.githubusercontent.com/luestr/ProxyResource/main/Tool/Loon/Plugin/VVebo_repair.plugin">长按复制</a></td>
-<td><a href="loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Fluestr%2FProxyResource%2Fmain%2FTool%2FLoon%2FPlugin%2FVVebo_repair.plugin">一键导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Fluestr%2FProxyResource%2Fmain%2FTool%2FLoon%2FPlugin%2FVVebo_repair.plugin">一键导入</a></td>
 </tr>
 <tr>
 <td>少数派 RSS 防盗链修复</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/plugin/sspai-rss.plugin">长按复制</a></td>
-<td><a href="loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fsspai-rss.plugin">一键导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fsspai-rss.plugin">一键导入</a></td>
 </tr>
 <tr>
 <td>重定向</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/plugin/redirect.plugin">长按复制</a></td>
-<td><a href="loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fredirect.plugin">一键导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fredirect.plugin">一键导入</a></td>
 </tr>
 <tr>
 <td>slidebox</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/plugin/slidebox.plugin">长按复制</a></td>
-<td><a href="loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fslidebox.plugin">一键导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fslidebox.plugin">一键导入</a></td>
 </tr>
 <tr>
 <td>人人视频</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/plugin/renrenshipin.plugin">长按复制</a></td>
-<td><a href="loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Frenrenshipin.plugin">一键导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Frenrenshipin.plugin">一键导入</a></td>
 </tr>
 <tr>
 <td>MOZE</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Loon/plugin/moze.plugin">长按复制</a></td>
-<td><a href="loon://import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fmoze.plugin">一键导入</a></td>
+<td><a href="https://www.nsloon.com/openloon/import?plugin=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FLoon%2Fplugin%2Fmoze.plugin">一键导入</a></td>
 </tr>
 </tbody>
 </table>
