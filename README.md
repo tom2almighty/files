@@ -85,7 +85,7 @@
 </tbody>
 </table>
 
-[点击导入](surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf)
+surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf
 
 
 
