@@ -17,28 +17,23 @@
 <tr>
 <th style="text-align:left">名称</th>
 <th>链接</th>
-<th>一键导入</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td style="text-align:left">完整配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge.conf" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge.conf" target="_blank" title="点击导入">点击导入</a></td>
 </tr>
 <tr>
 <td style="text-align:left">精简配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-mini.conf" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-mini.conf" title="点击导入">点击导入</a></td>
 </tr>
 <tr>
 <td style="text-align:left">开发者推荐最小配置</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-developer.conf" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-config?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2FSurge-developer.conf" title="点击导入">点击导入</a></td>
 </tr>
 </tbody>
 </table>
-
 
 
 ### 模块
@@ -49,39 +44,33 @@
 <tr>
 <th>名称</th>
 <th>链接</th>
-<th>一键导入</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>VVebo 时间线修复</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/vvebo.sgmodule" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-module?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2Fmodule%2Fvvebo.sgmodule">点击导入</a></td>
+
 </tr>
 <tr>
 <td>少数派 RSS 防盗链修复</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/sspai-rss.sgmodule" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-module?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2Fmodule%2Fsspai-rss.sgmodule">点击导入</a></td>
 </tr>
 <tr>
 <td>重定向</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/redirect.sgmodule" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-module?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2Fmodule%2Fredirect.sgmodule">点击导入</a></td>
 </tr>
 <tr>
 <td>slidebox</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/slidebox.sgmodule" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-module?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2Fmodule%2Fslidebox.sgmodule">点击导入</a></td>
 </tr>
 <tr>
 <td>人人视频</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/renrenshipin.sgmodule" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-module?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2Fmodule%2Frenrenshipin.sgmodule">点击导入</a></td>
 </tr>
 <tr>
 <td>MOZE</td>
 <td><a href="https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/moze.sgmodule" target="_blank">长按复制</a></td>
-<td><a href="surge:///install-module?url=https%3A%2F%2Fraw.githubusercontent.com%2Ftom2almighty%2Ffiles%2Fmain%2FSurge%2Fmodule%2Fmoze.sgmodule">点击导入</a></td>
 </tr>
 </tbody>
 </table>
@@ -91,7 +80,6 @@
 
 ## Loon
 ### 配置
-
 
 <table>
 <thead>
