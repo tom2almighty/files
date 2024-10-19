@@ -1,6 +1,9 @@
-#!name = Fix VVebo User Profile
+#!name = 修复 VVebo 用户页面
 #!desc = 修复VVebo失效的用户页面，需要打开Mitm，感谢@suiyuran。
-#!category=工具
+#!category=🛠️ 工具
+#!author=suiyuran
+
+
 [Script]
 fix-vvebo-user-timeline = type=http-request, pattern=^https:\/\/api\.weibo\.cn\/2\/remind\/unread_count\?, script-path=https://raw.githubusercontent.com/tom2almighty/files/main/Script/vvebo-timeline.js
 fix-vvebo-user-timeline2 = type=http-request, pattern=^https:\/\/api\.weibo\.cn\/2\/statuses\/user_timeline\?, script-path=https://raw.githubusercontent.com/tom2almighty/files/main/Script/vvebo-timeline.js
