@@ -197,7 +197,7 @@ rule-providers:
 # China_Download_CDN
   download_cn:
     <<: *Classical
-    url: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/X/Clash/Rules/Download_CN.list
+    url: https://raw.githubusercontent.com/tom2almighty/files/main/Clash/Rules/Download_CN.list
     path: ./rules/Download_CN.list
     format: text
 
@@ -301,7 +301,7 @@ rule-providers:
 # 国外下载 CDN
   download_global:
     <<: *Classical
-    url: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/X/Clash/Rules/Download_Global.list
+    url: https://raw.githubusercontent.com/tom2almighty/files/main/Clash/Rules/Download_Global.list
     path: ./rules/Download_Global.list
     format: text
 
