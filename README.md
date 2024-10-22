@@ -121,13 +121,13 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-developer.
 
 **Mihomo 完整配置**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/Mihomo/Mihomo.yaml
+https://raw.githubusercontent.com/tom2almighty/files/main/Clash/Mihomo.yaml
 ```
 
 
 **Mhomo 精简配置**
 ```
-https://raw.githubusercontent.com/tom2almighty/files/main/Mihomo/Mihomo-mini.yaml
+https://raw.githubusercontent.com/tom2almighty/files/main/Clash/Mihomo-mini.yaml
 ```
 
 
