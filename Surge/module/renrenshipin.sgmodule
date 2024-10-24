@@ -1,10 +1,13 @@
 #!name=人人视频
 #!desc=人人视频会员去广告 & 会员解锁 | 需登录 | 脚本作者 chxm1023
-#!author=chxm1023
 #!category=🪄 会员
 
-[Script]
-renrenshipin = type=http-response, pattern=^https?:\/\/api\.(hujuvod\.com|qwapp\.top)\/(user\/personal\/information|app\/drama\/page), script-path=https://raw.githubusercontent.com/tom2almighty/files/main/Script/renrenshipin.js, requires-body=true, max-size=-1, timeout=60
+[Body Rewrite]
+# 用户信息接口 - 解锁会员
+http-response-jq ^https?:\/\/api\.(hujuvod\.com|qwapp\.top)\/user\/personal\/information '.data.user.vipInfo = {"level":"3","valid":true,"expiredTime":4092599349000} | .data.user.level = 3 | .data.user.vipLevel = 3'
+
+# 视频页面接口 - 去广告和解锁播放
+http-response-jq ^https?:\/\/api\.(hujuvod\.com|qwapp\.top)\/app\/drama\/page 'walk(if type == "object" and has("canShowVip") then .canShowVip = false else . end | if type == "object" and has("externalAds") then .externalAds = false else . end | if type == "object" and has("feeMode") then .feeMode = "free" else . end | if type == "object" and has("enable") then .enable = true else . end | if type == "object" and has("canPlay") then .canPlay = true else . end)'
 
 [MITM]
 hostname = %APPEND% api.hujuvod.com, api.qwapp.top
