@@ -153,6 +153,13 @@ proxy-groups:
 
 # 订阅规则
 rule-providers:
+# 直连修复
+  direct_fix:
+    <<: *Classical
+    url: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Surge/Rules/DirectFix.list
+    path: ./rules/DirectFix.list
+    format: text
+
 # 直连程序
   direct:
     <<: *Classical
@@ -344,6 +351,7 @@ rule-providers:
 
 
 rules:
+  - RULE-SET,direct_fix,DIRECT
   - RULE-SET,direct,DIRECT
   - RULE-SET,awavenue_ad_rule,REJECT
   - RULE-SET,reject_non_ip_drop,REJECT-DROP
