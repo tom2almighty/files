@@ -156,7 +156,7 @@ rule-providers:
 # 直连修复
   direct_fix:
     <<: *Classical
-    url: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Surge/Rules/DirectFix.list
+    url: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Clash/Rules/DirectFix.list
     path: ./rules/DirectFix.list
     format: text
 

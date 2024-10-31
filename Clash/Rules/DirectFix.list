@@ -1,5 +1,5 @@
 # > NTP
-AND,((DEST-PORT,123),(PROTOCOL,UDP))
+AND,((DST-PORT,123),(NETWORK,UDP))
 
 # > IPv4/IPv6 Test
 DOMAIN-SUFFIX,test-ipv6.com
