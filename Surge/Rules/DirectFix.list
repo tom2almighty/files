@@ -67,11 +67,65 @@ DOMAIN,ifconfig.me/ip
 # > Linux DO
 DOMAIN-SUFFIX,linux.do
 
-# > 常用网站
+# > Public Direct CDN 公共直连
+DOMAIN-SUFFIX,baomitu.com
+DOMAIN-SUFFIX,bootcss.com
+DOMAIN-SUFFIX,jiasule.com
+DOMAIN-SUFFIX,staticfile.org
+DOMAIN-SUFFIX,upaiyun.com
+
+# > 不忘初心系统
 DOMAIN-SUFFIX,pc528.net
+
+# > 423下载
 DOMAIN-SUFFIX,423down.com
-DOMAIN-KEYWORD,libvio
 
 # > 爱奇艺直连修复
 DOMAIN-SUFFIX,inter.iqiyi.com
 DOMAIN,cache.video.iqiyi.com
+
+# > 大师兄影视
+DOMAIN,sdk.alibaba.com.ailbaba.me
+DOMAIN,img.ffzypic.com
+DOMAIN,img.liangzipic.com
+DOMAIN,img.bfzypic.com
+DOMAIN,img.kuaikanzy.net
+DOMAIN,vip.imgffzy.com
+DOMAIN,vip.ffzyread.com
+DOMAIN,cdn.jsdelivr.net
+DOMAIN,image.maimn.com
+DOMAIN-KEYWORD,bfzycdn.com
+DOMAIN-KEYWORD,vip.kuaikan-cdn
+DOMAIN-KEYWORD,vip.ffzy-play
+DOMAIN-KEYWORD,vip.ffzy-online
+
+
+# > 苹果推送服务
+DOMAIN-KEYWORD, push.apple.com
+# > 苹果时间同步
+DOMAIN, time.apple.com
+# > 苹果天气服务
+DOMAIN-KEYWORD, weather-edge.apple.com
+DOMAIN-KEYWORD, weather-adge.apple.com
+DOMAIN-SUFFIX, weather-data.apple.com
+DOMAIN-SUFFIX, weather-map.apple.com
+DOMAIN-SUFFIX, weather-analytics-events.apple.com
+# > 苹果内购服务
+DOMAIN-KEYWORD, buy.itunes.apple.com
+# > 苹果icloud
+DOMAIN-KEYWORD, icloud.com
+# > 苹果输入法相关服务
+DOMAIN-KEYWORD, api.smoot.apple.com
+DOMAIN-KEYWORD, api.smoot.apple.cn
+# > 苹果iMessage服务
+DOMAIN, init.ess.apple.com
+# > 苹果其他服务
+DOMAIN-KEYWORD, ssl.apple.com
+DOMAIN-KEYWORD, humb.apple.com
+DOMAIN, smp-device-content.apple.com
+DOMAIN-KEYWORD, api-adservices.apple.com
+DOMAIN-KEYWORD, ls.apple.com
+DOMAIN-KEYWORD, gsa.apple.com
+DOMAIN-KEYWORD, ess.apple.com
+# > 苹果app store
+DOMAIN, itunes.apple.com
