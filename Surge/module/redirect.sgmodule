@@ -1,5 +1,5 @@
 #!name=重定向
-#!desc=将 google.cn | google.com.hk 重定向至 google.com, 将 wikipedia 地区重定向至大陆
+#!desc=1.Safari谷歌搜索重定向至 google.com\n2.Wikipedia 地区重定向至大陆
 #!category=🛠️ 工具
 
 

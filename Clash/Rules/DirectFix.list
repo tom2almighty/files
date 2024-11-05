@@ -77,7 +77,7 @@ DOMAIN-SUFFIX,upaiyun.com
 # > 不忘初心系统
 DOMAIN-SUFFIX,pc528.net
 
-# > 423下载
+# > 423down
 DOMAIN-SUFFIX,423down.com
 
 # > 爱奇艺直连修复
@@ -93,7 +93,6 @@ DOMAIN,img.bfzypic.com
 DOMAIN,img.kuaikanzy.net
 DOMAIN,vip.imgffzy.com
 DOMAIN,vip.ffzyread.com
-DOMAIN,cdn.jsdelivr.net
 DOMAIN,image.maimn.com
 DOMAIN-KEYWORD,bfzycdn.com
 DOMAIN-KEYWORD,vip.kuaikan-cdn
@@ -130,3 +129,7 @@ DOMAIN-KEYWORD, gsa.apple.com
 DOMAIN-KEYWORD, ess.apple.com
 # > 苹果app store
 DOMAIN, itunes.apple.com
+
+
+# > jsdelivr
+DOMAIN,cdn.jsdelivr.net
