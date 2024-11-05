@@ -128,6 +128,3 @@ DOMAIN-KEYWORD, gsa.apple.com
 DOMAIN-KEYWORD, ess.apple.com
 # > 苹果app store
 DOMAIN, itunes.apple.com
-
-# > jsdelivr
-DOMAIN,cdn.jsdelivr.net
