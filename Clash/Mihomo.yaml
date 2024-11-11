@@ -137,6 +137,7 @@ proxy-groups:
   - {name: Emby, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Emby.png}
   - {name: Spotify, type: select, proxies: [DIRECT, Hong Kong, Japan, Singapore, United States, Others], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Spotify.png}
   - {name: Streaming, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Streaming.png}
+  - {name: OneDrive, type: select, proxies: [DIRECT, Hong Kong, Japan, Singapore, United States, Others], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/OneDrive.png}
   - {name: Microsoft, type: select, proxies: [DIRECT, Hong Kong, Japan, Singapore, United States, Others], icon: https://raw.githubusercontent.com/Orz-3/mini/master/Color/Microsoft.png}
   - {name: Download, type: select, proxies: [Hong Kong, Japan, Singapore, United States, Others, DIRECT], icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Download.png}
   # 地区策略 
@@ -235,6 +236,11 @@ rule-providers:
     url: https://ruleset.skk.moe/Clash/non_ip/microsoft_cdn.txt
     path: ./rules/microsoft_cdn.txt
     format: text
+
+  onedrive:
+    << : *Classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/OneDrive/OneDrive.yaml
+    path: ./rules/OneDrive.yaml
 
   microsoft:
     << : *Classical
@@ -364,6 +370,7 @@ rules:
   - RULE-SET,apple_cdn,DIRECT
   - RULE-SET,apple_services,DIRECT
   - RULE-SET,microsoft_cdn,DIRECT
+  - RULE-SET,onedrive,OneDrive
   - RULE-SET,microsoft,Microsoft
   - RULE-SET,ai,AIGC
   - RULE-SET,steam,Proxy
