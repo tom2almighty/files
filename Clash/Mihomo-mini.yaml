@@ -367,6 +367,7 @@ rules:
   - RULE-SET,apple_cn_non_ip,DIRECT
   - RULE-SET,apple_cdn,DIRECT
   - RULE-SET,apple_services,DIRECT
+  - DOMAIN-SUFFIX,onedrive.live.com,Microsoft
   - RULE-SET,microsoft_cdn,DIRECT
   - RULE-SET,onedrive,OneDrive
   - RULE-SET,microsoft,Microsoft
