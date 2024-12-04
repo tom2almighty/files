@@ -281,7 +281,7 @@ rules:
   - RULE-SET,reject_ip,REJECT
   # Geosite
   - GEOSITE,private,DIRECT
-  - GEOSITE,steam_cn,DIRECT
+  - GEOSITE,steam@cn,DIRECT
   - GEOSITE,category-games@cn,DIRECT
   - GEOSITE,apple-cn,DIRECT
   - GEOSITE,apple@cn,DIRECT
