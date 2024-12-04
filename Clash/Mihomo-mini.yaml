@@ -7,19 +7,19 @@
 
 
 # 可将 proxy-providers 中的 url 替换为自己的订阅链接放入全局扩展中
-# proxy-providers: 
-#   Sub1:
-#     url: '订阅链接'
-#     path: './proxy-providers/sub1.yaml'
-#     type: http
-#     interval: 86400
-#     override:
-#       additional-prefix: "Sub1 " # 订阅前缀
-#     health-check: 
-#       enable: true
-#       lazy: true
-#       url: http://connectivitycheck.platform.hicloud.com/generate_204
-#       interval: 60
+proxy-providers: 
+  Sub1:
+    url: '订阅链接'
+    path: './proxy-providers/sub1.yaml'
+    type: http
+    interval: 86400
+    override:
+      additional-prefix: "Sub1 " # 订阅前缀
+    health-check: 
+      enable: true
+      lazy: true
+      url: http://connectivitycheck.platform.hicloud.com/generate_204
+      interval: 60
 
 
 
