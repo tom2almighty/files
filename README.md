@@ -115,8 +115,6 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Surge/Surge-developer.
 </table>
 
 
-
-
 ## Clash 配置
 
 **Mihomo 完整配置**
@@ -129,22 +127,6 @@ https://raw.githubusercontent.com/tom2almighty/files/main/Clash/Mihomo.yaml
 ```
 https://raw.githubusercontent.com/tom2almighty/files/main/Clash/Mihomo-mini.yaml
 ```
-
-
-**Subconverter 完整配置**
-```
-https://raw.githubusercontent.com/tom2almighty/files/main/Clash/clash.ini
-```
-
-
-**Subconverter 精简配置**
-```
-https://raw.githubusercontent.com/tom2almighty/files/main/Clash/clash_mini.ini
-```
-
-
-
-
 
 ## Quantumult X 配置
 
