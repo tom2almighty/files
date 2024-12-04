@@ -288,6 +288,7 @@ rules:
   - GEOSITE,microsoft@cn,DIRECT
   - DOMAIN-SUFFIX,onedrive.live.com,Microsoft
   - GEOSITE,onedrive,OneDrive
+  - GEOSITE,github,Proxy
   - GEOSITE,microsoft,Microsoft
   - GEOSITE,telegram,Proxy
   - GEOSITE,spotify,Spotify
