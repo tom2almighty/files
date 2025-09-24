@@ -6,28 +6,35 @@
 set -e  # 遇到错误立即退出
 
 # 颜色定义
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
+RED='\033[0;31m' GREEN='\033[0;32m' YELLOW='\033[1;33m' BLUE='\033[0;34m' NC='\033[0m'
+
+# 通用输入函数
+safe_read() {
+    local prompt="$1"
+    local var_name="$2"
+    local default="$3"
+    
+    if [[ -n "$prompt" ]]; then
+        echo -e "$prompt"
+    fi
+    
+    if [ ! -t 0 ]; then
+        read -r "$var_name" < /dev/tty
+    else
+        read -r "$var_name"
+    fi
+    
+    # 设置默认值
+    if [[ -z "${!var_name}" && -n "$default" ]]; then
+        eval "$var_name=\"$default\""
+    fi
+}
 
 # 日志函数
-log_info() {
-    echo -e "${BLUE}[INFO]${NC} $1"
-}
-
-log_success() {
-    echo -e "${GREEN}[SUCCESS]${NC} $1"
-}
-
-log_warning() {
-    echo -e "${YELLOW}[WARNING]${NC} $1"
-}
-
-log_error() {
-    echo -e "${RED}[ERROR]${NC} $1"
-}
+log_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
+log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
+log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
+log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
 # 检查是否为root用户
 check_root() {
@@ -36,6 +43,82 @@ check_root() {
         log_info "请使用: sudo $0"
         exit 1
     fi
+}
+
+# 安全检查函数
+security_checks() {
+    log_info "执行安全检查..."
+    
+    # 检查SSH服务状态
+    if ! systemctl is-active --quiet sshd; then
+        log_warning "SSH服务未运行"
+        return 0
+    fi
+    
+    # 检查当前SSH配置
+    local config_file="/etc/ssh/sshd_config"
+    if [[ -f "$config_file" ]]; then
+        # 检查是否已启用密钥认证
+        if grep -q "^PubkeyAuthentication yes" "$config_file"; then
+            log_info "密钥认证已启用"
+        fi
+        
+        # 检查密码认证状态
+        if grep -q "^PasswordAuthentication no" "$config_file"; then
+            log_warning "密码认证已禁用"
+        fi
+    fi
+    
+    # 检查.ssh目录权限
+    if [[ -d "$HOME/.ssh" ]]; then
+        local ssh_perms=$(stat -c "%a" "$HOME/.ssh" 2>/dev/null)
+        if [[ "$ssh_perms" != "700" ]]; then
+            log_warning ".ssh目录权限不安全 (当前: $ssh_perms，应为: 700)"
+        fi
+    fi
+    
+    # 检查authorized_keys权限
+    if [[ -f "$HOME/.ssh/authorized_keys" ]]; then
+        local auth_keys_perms=$(stat -c "%a" "$HOME/.ssh/authorized_keys" 2>/dev/null)
+        if [[ "$auth_keys_perms" != "600" ]]; then
+            log_warning "authorized_keys文件权限不安全 (当前: $auth_keys_perms，应为: 600)"
+        fi
+    fi
+    
+    log_success "安全检查完成"
+}
+
+# 验证公钥格式
+validate_public_key() {
+    local key="$1"
+    
+    # 基本格式检查
+    if [[ -z "$key" ]]; then
+        log_error "公钥不能为空"
+        return 1
+    fi
+    
+    # 检查是否以有效的SSH密钥类型开头
+    if [[ ! "$key" =~ ^(ssh-rsa|ssh-ed25519|ssh-dss|ecdsa-sha2-nistp256|ecdsa-sha2-nistp384|ecdsa-sha2-nistp521) ]]; then
+        log_error "无效的SSH公钥格式"
+        return 1
+    fi
+    
+    # 检查是否包含必要的空格分隔部分
+    local key_parts=($key)
+    if [[ ${#key_parts[@]} -lt 2 ]]; then
+        log_error "公钥格式不完整"
+        return 1
+    fi
+    
+    # 检查base64部分（简单的长度检查）
+    local base64_part="${key_parts[1]}"
+    if [[ ${#base64_part} -lt 50 ]]; then
+        log_error "公钥数据部分过短"
+        return 1
+    fi
+    
+    return 0
 }
 
 # 备份重要文件
@@ -70,28 +153,354 @@ get_public_key() {
     echo -e "${YELLOW}然后使用 'cat ~/.ssh/id_rsa.pub' 查看公钥内容${NC}"
     echo
     
-    read -r public_key
+    # 使用通用输入函数
+    if [ ! -t 0 ]; then
+        log_info "检测到管道执行模式，使用专用输入通道..."
+    fi
+    safe_read "" "public_key"
     
     # 验证公钥格式
-    if [[ -z "$public_key" ]]; then
-        log_error "公钥不能为空"
-        return 1
-    fi
-    
-    # 简单的公钥格式验证
-    if [[ ! "$public_key" =~ ^(ssh-rsa|ssh-ed25519|ssh-dss|ecdsa-sha2-) ]]; then
-        log_warning "公钥格式可能不正确，但仍将继续..."
-        echo -e "${YELLOW}确认继续吗? (y/N): ${NC}"
-        read -r confirm
-        if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+    if ! validate_public_key "$public_key"; then
+        safe_read "${YELLOW}公钥格式验证失败，是否重新输入? (Y/n): ${NC}" "retry" "Y"
+        if [[ ! "$retry" =~ ^[Nn]$ ]]; then
+            log_info "请重新输入公钥..."
+            return get_public_key
+        else
             log_info "操作已取消"
             return 1
         fi
     fi
     
-    # 将公钥保存到全局变量
     PUBLIC_KEY="$public_key"
     return 0
+}
+
+# 生成SSH密钥对
+generate_ssh_keypair() {
+    echo
+    log_info "SSH密钥对生成功能"
+    echo "================================"
+    echo
+    
+    # 询问密钥类型
+    echo "请选择密钥类型:"
+    echo "1) RSA (4096位) - 兼容性最好"
+    echo "2) ED25519 - 现代算法，性能更好"
+    echo "3) ECDSA (256位) - 较新的算法"
+    echo
+    
+    safe_read "" "key_choice" "1"
+    case $key_choice in
+        1) key_type="rsa" key_bits="4096" ;;
+        2) key_type="ed25519" key_bits="" ;;
+        3) key_type="ecdsa" key_bits="256" ;;
+        *) log_warning "默认选择RSA 4096位"; key_type="rsa" key_bits="4096" ;;
+    esac
+    
+    # 询问密钥文件名
+    echo
+    safe_read "${YELLOW}请输入密钥文件名 (默认: id_${key_type}): ${NC}" "key_filename" "id_${key_type}"
+    
+    # 询问密钥密码
+    echo
+    safe_read "${YELLOW}是否为私钥设置密码保护? (y/N): ${NC}" "use_passphrase" "N"
+    
+    passphrase_args=""
+    if [[ "$use_passphrase" =~ ^[Yy]$ ]]; then
+        passphrase_args="-N"
+        log_info "将在生成过程中提示输入密码"
+    else
+        passphrase_args="-N \"\""
+        log_info "不设置密码保护"
+    fi
+    
+    # 生成密钥对
+    echo
+    log_info "正在生成密钥对..."
+    
+    local temp_dir="/tmp/ssh_keygen_$$"
+    mkdir -p "$temp_dir"
+    
+    if [[ -n "$key_bits" ]]; then
+        if [[ "$use_passphrase" =~ ^[Yy]$ ]]; then
+            ssh-keygen -t "$key_type" -b "$key_bits" -f "$temp_dir/$key_filename"
+        else
+            ssh-keygen -t "$key_type" -b "$key_bits" -f "$temp_dir/$key_filename" -N ""
+        fi
+    else
+        if [[ "$use_passphrase" =~ ^[Yy]$ ]]; then
+            ssh-keygen -t "$key_type" -f "$temp_dir/$key_filename"
+        else
+            ssh-keygen -t "$key_type" -f "$temp_dir/$key_filename" -N ""
+        fi
+    fi
+    
+    if [[ $? -eq 0 ]]; then
+        log_success "密钥对生成成功!"
+        
+        # 读取公钥
+        PUBLIC_KEY=$(cat "$temp_dir/${key_filename}.pub")
+        
+        echo
+        echo -e "${GREEN}=== 公钥 ===${NC}"
+        echo "$PUBLIC_KEY"
+        echo
+        
+        echo -e "${RED}=== 私钥 (请妥善保存) ===${NC}"
+        cat "$temp_dir/$key_filename"
+        echo
+        
+        echo -e "${YELLOW}=== 重要提醒 ===${NC}"
+        echo "1. 请立即复制保存私钥，此窗口关闭后将无法恢复"
+        echo "2. 私钥文件权限应设置为 600"
+        echo "3. 建议将私钥保存到 ~/.ssh/ 目录"
+        echo "4. 使用命令: chmod 600 ~/.ssh/${key_filename}"
+        echo
+        
+        # 询问是否继续配置
+        safe_read "${YELLOW}是否继续使用此密钥配置SSH? (Y/n): ${NC}" "continue_setup" "Y"
+        if [[ ! "$continue_setup" =~ ^[Nn]$ ]]; then
+            log_info "将使用生成的密钥继续配置"
+            # 清理临时文件
+            rm -rf "$temp_dir"
+            return 0
+        else
+            log_info "已保存密钥文件到: $temp_dir/"
+            echo "请手动复制文件后删除临时目录"
+            return 1
+        fi
+    else
+        log_error "密钥对生成失败"
+        rm -rf "$temp_dir"
+        return 1
+    fi
+}
+
+# 恢复备份文件
+restore_backup() {
+    echo
+    log_info "SSH配置恢复功能"
+    echo "================================"
+    
+    # 检查是否有备份文件
+    if [[ ! -f /tmp/ssh_backup_path ]]; then
+        log_error "未找到备份路径记录"
+        safe_read "${YELLOW}请手动指定备份目录路径: ${NC}" "backup_dir"
+    else
+        backup_dir=$(cat /tmp/ssh_backup_path)
+    fi
+    
+    if [[ -z "$backup_dir" || ! -d "$backup_dir" ]]; then
+        log_error "备份目录不存在: $backup_dir"
+        return 1
+    fi
+    
+    echo -e "${YELLOW}找到备份目录: $backup_dir${NC}"
+    echo "备份内容:"
+    ls -la "$backup_dir" 2>/dev/null || echo "  备份目录为空"
+    echo
+    
+    echo -e "${RED}警告: 恢复操作将覆盖当前配置！${NC}"
+    safe_read "${YELLOW}确认恢复备份? (y/N): ${NC}" "confirm_restore" "N"
+    
+    if [[ ! "$confirm_restore" =~ ^[Yy]$ ]]; then
+        log_info "恢复操作已取消"
+        return 0
+    fi
+    
+    # 恢复sshd_config
+    if [[ -f "$backup_dir/sshd_config.bak" ]]; then
+        cp "$backup_dir/sshd_config.bak" /etc/ssh/sshd_config
+        log_success "已恢复SSH配置文件"
+    fi
+    
+    # 恢复authorized_keys
+    if [[ -f "$backup_dir/authorized_keys.bak" ]]; then
+        cp "$backup_dir/authorized_keys.bak" ~/.ssh/authorized_keys
+        chmod 600 ~/.ssh/authorized_keys
+        chown root:root ~/.ssh/authorized_keys
+        log_success "已恢复authorized_keys文件"
+    fi
+    
+    # 重启SSH服务
+    if systemctl restart sshd; then
+        log_success "SSH服务重启成功"
+    else
+        log_error "SSH服务重启失败"
+        return 1
+    fi
+    
+    log_success "备份恢复完成！"
+    return 0
+}
+
+# 显示主菜单
+show_main_menu() {
+    clear
+    echo -e "${BLUE}================================${NC}"
+    echo -e "${BLUE}      SSH密钥配置管理工具${NC}"
+    echo -e "${BLUE}================================${NC}"
+    echo
+    echo "1. 快速配置 (自动备份 + 设置密钥登录)"
+    echo "2. 仅粘贴公钥配置"
+    echo "3. 生成新密钥对并配置"
+    echo "4. 仅备份SSH配置"
+    echo "5. 恢复SSH配置备份"
+    echo "6. 安全检查和状态"
+    echo "7. 检查配置冲突"
+    echo "8. 测试SSH配置"
+    echo "9. 重启SSH服务"
+    echo "10. 显示连接信息"
+    echo "0. 退出"
+    echo
+    echo -e "${YELLOW}请选择操作 (0-10): ${NC}"
+}
+
+# 处理菜单选择
+handle_menu_choice() {
+    local choice="$1"
+    
+    case $choice in
+        1)
+            log_info "开始快速配置..."
+            check_root
+            backup_files
+            
+            echo -e "${YELLOW}选择获取公钥方式:${NC}"
+            echo "1) 粘贴现有公钥"
+            echo "2) 生成新密钥对"
+            echo
+            
+            safe_read "" "key_method" "1"
+            
+            if [[ "$key_method" == "2" ]]; then
+                if ! generate_ssh_keypair; then
+                    log_error "密钥生成失败"
+                    return 1
+                fi
+            else
+                if ! get_public_key; then
+                    log_error "获取公钥失败"
+                    return 1
+                fi
+            fi
+            
+            setup_authorized_keys "$PUBLIC_KEY"
+            configure_ssh
+            check_include_configs
+            
+            if ! test_ssh_config; then
+                log_error "配置测试失败"
+                return 1
+            fi
+            
+            if ! restart_ssh; then
+                log_error "SSH服务重启失败"
+                return 1
+            fi
+            
+            show_warnings
+            show_test_command
+            log_success "快速配置完成！"
+            ;;
+            
+        2)
+            log_info "开始公钥配置..."
+            check_root
+            
+            if ! get_public_key; then
+                log_error "获取公钥失败"
+                return 1
+            fi
+            
+            setup_authorized_keys "$PUBLIC_KEY"
+            log_success "公钥配置完成！"
+            ;;
+            
+        3)
+            log_info "开始生成密钥对并配置..."
+            check_root
+            
+            if ! generate_ssh_keypair; then
+                log_error "密钥生成失败"
+                return 1
+            fi
+            
+            setup_authorized_keys "$PUBLIC_KEY"
+            configure_ssh
+            
+            if ! test_ssh_config; then
+                log_error "配置测试失败"
+                return 1
+            fi
+            
+            if ! restart_ssh; then
+                log_error "SSH服务重启失败"
+                return 1
+            fi
+            
+            show_warnings
+            show_test_command
+            log_success "密钥对生成和配置完成！"
+            ;;
+            
+        4)
+            log_info "开始备份SSH配置..."
+            check_root
+            backup_files
+            ;;
+            
+        5)
+            log_info "开始恢复SSH配置..."
+            check_root
+            restore_backup
+            ;;
+            
+        6)
+            log_info "执行安全检查..."
+            check_root
+            security_checks
+            ;;
+            
+        7)
+            log_info "检查配置冲突..."
+            check_root
+            check_include_configs
+            ;;
+            
+        8)
+            log_info "测试SSH配置..."
+            check_root
+            if test_ssh_config; then
+                log_success "SSH配置测试通过"
+            else
+                log_error "SSH配置测试失败"
+            fi
+            ;;
+            
+        9)
+            log_info "重启SSH服务..."
+            check_root
+            if restart_ssh; then
+                log_success "SSH服务重启成功"
+            else
+                log_error "SSH服务重启失败"
+            fi
+            ;;
+            
+        10)
+            show_test_command
+            ;;
+            
+        0)
+            log_info "感谢使用SSH密钥配置管理工具！"
+            exit 0
+            ;;
+            
+        *)
+            log_error "无效选择，请重新输入"
+            ;;
+    esac
 }
 
 # 配置authorized_keys文件
@@ -141,34 +550,25 @@ configure_ssh() {
         return 1
     fi
     
-    # 使用sed命令修改配置
-    # PermitRootLogin
-    if grep -q "^#*PermitRootLogin" "$config_file"; then
-        sed -i 's/^#*PermitRootLogin.*/PermitRootLogin yes/' "$config_file"
-    else
-        echo "PermitRootLogin yes" >> "$config_file"
-    fi
+    # 配置项数组：模式 -> 替换内容
+    local configs=(
+        "PermitRootLogin.*|PermitRootLogin yes"
+        "PubkeyAuthentication.*|PubkeyAuthentication yes"
+        "AuthorizedKeysFile.*|AuthorizedKeysFile      .ssh/authorized_keys"
+        "PasswordAuthentication.*|PasswordAuthentication no"
+    )
     
-    # PubkeyAuthentication
-    if grep -q "^#*PubkeyAuthentication" "$config_file"; then
-        sed -i 's/^#*PubkeyAuthentication.*/PubkeyAuthentication yes/' "$config_file"
-    else
-        echo "PubkeyAuthentication yes" >> "$config_file"
-    fi
-    
-    # AuthorizedKeysFile
-    if grep -q "^#*AuthorizedKeysFile" "$config_file"; then
-        sed -i 's|^#*AuthorizedKeysFile.*|AuthorizedKeysFile      .ssh/authorized_keys|' "$config_file"
-    else
-        echo "AuthorizedKeysFile      .ssh/authorized_keys" >> "$config_file"
-    fi
-    
-    # PasswordAuthentication
-    if grep -q "^#*PasswordAuthentication" "$config_file"; then
-        sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' "$config_file"
-    else
-        echo "PasswordAuthentication no" >> "$config_file"
-    fi
+    # 批量修改配置
+    for config in "${configs[@]}"; do
+        local pattern="${config%%|*}"
+        local replacement="${config#*|}"
+        
+        if grep -q "^#*${pattern%.*}" "$config_file"; then
+            sed -i "s/^#*${pattern}/${replacement}/" "$config_file"
+        else
+            echo "${replacement#* }" >> "$config_file"
+        fi
+    done
     
     log_success "SSH配置文件修改完成"
 }
@@ -256,7 +656,7 @@ check_include_configs() {
         echo
         echo -e "${RED}是否继续执行脚本？继续执行可能导致安全配置被覆盖！${NC}"
         echo -e "${YELLOW}继续执行 (y) / 退出处理冲突 (N): ${NC}"
-        read -r continue_choice
+        safe_read "" "continue_choice" "N"
         
         if [[ ! "$continue_choice" =~ ^[Yy]$ ]]; then
             log_info "脚本已退出，请处理配置冲突后重新运行"
@@ -354,56 +754,77 @@ show_test_command() {
     echo
 }
 
-# 主函数
+# 主函数 - 支持命令行参数和菜单模式
 main() {
+    case ${1:-} in
+        --help|-h)
+            cat << EOF
+SSH密钥配置管理工具
+
+用法: $0 [选项]
+
+选项:
+  --help, -h     显示此帮助信息
+  --quick        快速配置模式（兼容原版本）
+  --menu         菜单模式（默认）
+
+快速配置模式将自动执行完整的SSH密钥配置流程
+菜单模式提供交互式操作界面
+EOF
+            exit 0
+            ;;
+        --quick)
+            log_info "使用快速配置模式..."
+            execute_quick_setup
+            ;;
+        "")
+            execute_menu_mode
+            ;;
+        *)
+            log_error "未知选项: $1"
+            echo "使用 --help 查看帮助信息"
+            exit 1
+            ;;
+    esac
+}
+
+# 快速配置模式（兼容原版本）
+execute_quick_setup() {
     echo -e "${BLUE}================================${NC}"
-    echo -e "${BLUE} SSH密钥配置脚本${NC}"
+    echo -e "${BLUE} SSH密钥配置脚本 - 快速模式${NC}"
     echo -e "${BLUE}================================${NC}"
     echo
     
-    # 检查权限
-    check_root
-    
-    # 备份文件
+    check_root || exit 1
     backup_files
     
-    # 获取公钥
-    if ! get_public_key; then
-        log_error "获取公钥失败，脚本退出"
-        exit 1
-    fi
-    
-    # 配置authorized_keys
+    get_public_key || { log_error "获取公钥失败，脚本退出"; exit 1; }
     setup_authorized_keys "$PUBLIC_KEY"
-    
-    # 配置SSH
     configure_ssh
-    
-    # 检查Include配置冲突
     check_include_configs
     
-    # 测试配置
     if ! test_ssh_config; then
         log_error "配置测试失败，正在恢复备份..."
-        backup_dir=$(cat /tmp/ssh_backup_path)
-        if [[ -f "$backup_dir/sshd_config.bak" ]]; then
-            cp "$backup_dir/sshd_config.bak" /etc/ssh/sshd_config
-            log_info "已恢复SSH配置文件"
-        fi
+        local backup_dir=$(cat /tmp/ssh_backup_path 2>/dev/null)
+        [[ -f "$backup_dir/sshd_config.bak" ]] && cp "$backup_dir/sshd_config.bak" /etc/ssh/sshd_config && log_info "已恢复SSH配置文件"
         exit 1
     fi
     
-    # 重启SSH服务
-    if ! restart_ssh; then
-        log_error "SSH服务重启失败，请检查配置"
-        exit 1
-    fi
-    
-    # 显示提醒和测试命令
+    restart_ssh || { log_error "SSH服务重启失败，请检查配置"; exit 1; }
     show_warnings
     show_test_command
-    
     log_success "SSH密钥配置完成！"
+}
+
+# 菜单模式
+execute_menu_mode() {
+    while true; do
+        show_main_menu
+        safe_read "" "choice"
+        handle_menu_choice "$choice"
+        echo
+        safe_read "${YELLOW}按回车键继续...${NC}" "dummy"
+    done
 }
 
 # 执行主函数
