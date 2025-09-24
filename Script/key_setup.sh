@@ -564,7 +564,8 @@ configure_ssh() {
         local replacement="${config#*|}"
         
         if grep -q "^#*${pattern%.*}" "$config_file"; then
-            sed -i "s/^#*${pattern}/${replacement}/" "$config_file"
+            # 使用|作为sed分隔符，避免路径中的/冲突
+            sed -i "s|^#*${pattern}|${replacement}|" "$config_file"
         else
             echo "${replacement#* }" >> "$config_file"
         fi
