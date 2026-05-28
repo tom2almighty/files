@@ -1,12 +1,12 @@
 #!name=通用签到 (NewAPI)
-#!desc=适配所有 NewAPI 源码搭建的中转站。先在浏览器访问任意 NewAPI 站点个人中心一次（触发 /api/user/self），脚本会自动保存 Cookie / new-api-user，之后由定时任务自动签到，支持多站点、多账户。脚本部署：将 new-api.surge.js 放置到 Surge 资源目录或改写下方 script-path 为远程 URL。
+#!desc=适配所有 NewAPI 源码搭建的中转站。先在浏览器访问任意 NewAPI 站点个人中心一次（触发 /api/user/self），脚本会自动保存 Cookie / new-api-user，之后由定时任务自动签到，支持多站点、多账户。
 #!category=签到
 #!arguments=cron_expr:"10 9 * * *",notify_success:true,notify_skipped:false,host_filter:"",mitm_hosts:"*"
 #!arguments-desc=cron_expr: 定时签到的 cron 表达式（默认每天 09:10，标准 5 段式）\nnotify_success: 签到成功是否发送通知（默认开启，关闭后仅在异常情况下提醒）\nnotify_skipped: 已标记登录失效的账户被跳过时是否通知（默认关闭，避免噪音）\nhost_filter: 仅签到指定域名（留空则签到所有已保存的站点；多账户仍会全部跑）\nmitm_hosts: MITM 主机白名单（默认 `*` 全量；可改为具体域名列表，逗号分隔，可降低 MITM 范围）
 
 [Script]
 NewAPI Header Capture = type=http-request,pattern=^https:\/\/[^\/]+\/api\/user\/self$,requires-body=0,max-size=0,script-path=https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Script/new-api.js
-NewAPI Daily Checkin = type=cron,cronexp="{cron_expr}",wake-system=1,timeout=120,script-path=https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Script/new-api.js,argument="notify_success={notify_success}&notify_skipped={notify_skipped}&host_filter={host_filter}"
+NewAPI Daily Checkin = type=cron,cronexp="{{{cron_expr}}}",wake-system=1,timeout=120,script-path=https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Script/new-api.js,argument="notify_success={{{notify_success}}}&notify_skipped={{{notify_skipped}}}&host_filter={{{host_filter}}}"
 
 [MITM]
-hostname = %APPEND% {mitm_hosts}
+hostname = %APPEND% {{{mitm_hosts}}}
