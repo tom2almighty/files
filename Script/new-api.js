@@ -1,19 +1,3 @@
-/******************************
-脚本功能：通用签到（适配所有 NewAPI 源码搭建的中转站）
-适用环境：Surge iOS / macOS (Module Mode)
-更新时间：2026-05-28
-模块入口：new-api.sgmodule
-
-使用说明：
-1. 在 Surge 中安装 new-api.sgmodule，开启 MITM 与对应 hostname。
-2. 在浏览器中打开任意 NewAPI 站点个人中心一次（自动触发 /api/user/self），
-   脚本会拦截并保存所需请求头（按 域名 + new-api-user 隔离）。
-3. 之后由 cron 任务自动签到，多站点、多账户均会依次执行。
-
-可在 sgmodule 中通过 #!arguments 配置：
-- cron_expr / notify_success / notify_skipped / host_filter
-*******************************/
-
 const HEADER_KEY_PREFIX = "UniversalCheckin_Headers";
 const HOSTS_LIST_KEY = "UniversalCheckin_HostsList";
 const FAILED_KEY_PREFIX = "UniversalCheckin_Failed";
