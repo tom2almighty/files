@@ -1,19 +1,3 @@
-/******************************
-脚本功能：NS 论坛签到 (Surge 模块版)
-适用环境：Surge iOS / macOS (Module Mode)
-更新时间：2026-05-28
-模块入口：nodeseek.sgmodule
-
-使用说明：
-1. 在 Surge 中安装 nodeseek.sgmodule，开启 MITM 并将 www.nodeseek.com 加入 hostname。
-2. 在浏览器中打开 NodeSeek 个人页面一次（触发 /api/account/getInfo/{uid}?readme=1），
-   脚本会自动拦截并保存签到所需请求头（含 refract-sign / refract-key 等防风控字段）。
-3. 之后由 cron 任务自动签到。
-
-可在 sgmodule 中通过 #!arguments 配置：
-- cron_expr / notify_success
-*******************************/
-
 const NS_HEADER_KEY = "NS_NodeseekHeaders";
 const isGetHeader = typeof $request !== "undefined";
 
