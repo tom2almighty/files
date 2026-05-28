@@ -1,6 +1,6 @@
 #!name=NodeSeek 签到
 #!desc=NodeSeek 论坛每日签到。先在浏览器访问个人页面一次（触发 /api/account/getInfo/{uid}?readme=1），脚本会自动保存请求头，之后由定时任务自动签到。
-#!category=签到
+#!category=🛠️ 工具
 #!arguments=cron_expr:"30 8 * * *",notify_success:true
 #!arguments-desc=cron_expr: 定时签到的 cron 表达式（默认每天 08:30，标准 5 段式）\nnotify_success: 签到成功是否发送通知（默认开启，关闭后仅在异常情况下提醒，例如风控、Cookie 失效等）
 
