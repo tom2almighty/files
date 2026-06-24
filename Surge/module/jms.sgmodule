@@ -1,0 +1,11 @@
+#!name=Just My Socks 用量查询
+#!desc=在 Surge 面板中显示 Just My Socks 已用流量、剩余流量和重置日期
+#!category=Panel
+#!arguments=SERVICE:你的serviceId,ID:你的ID
+#!arguments-desc=[参数设置]\n\n⓵ SERVICE: 填写 Just My Socks 的 serviceId。\n\n⓶ ID: 填写 Just My Socks 的订阅 ID。
+
+[Script]
+jms-usage = type=generic,timeout=10,script-path=https://jms.341358.xyz/?service={{{SERVICE}}}&id={{{ID}}}&format=surge-script,script-update-interval=3600
+
+[Panel]
+JMS 用量查询 = title=JMS 用量查询,content=刷新后显示用量,style=info,script-name=jms-usage,update-interval=3600
