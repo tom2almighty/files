@@ -126,7 +126,7 @@ rules:
       policy: Proxy
 
   - rule_set:
-      match: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/Surge/Rules/Emby.list
+      match: https://raw.githubusercontent.com/tom2almighty/files/refs/heads/main/surge/rules/emby.list
       policy: Emby
       name: Emby
 

@@ -1,20 +1,20 @@
 <div align="center">
- <img src="https://raw.githubusercontent.com/tom2almighty/files/main/assets/Surge.png" width="200">
+ <img src="https://raw.githubusercontent.com/tom2almighty/files/main/assets/surge.png" width="200">
 </div>
 
 ## 模块
 
 ### 工具模块
 
-- [VVebo 修复](https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/vvebo.sgmodule)
-- [少数派 RSS 防盗链修复](https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/sspai-rss.sgmodule)
-- [重定向](https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/redirect.sgmodule)
+- [VVebo 修复](https://raw.githubusercontent.com/tom2almighty/files/main/surge/module/vvebo.sgmodule)
+- [少数派 RSS 防盗链修复](https://raw.githubusercontent.com/tom2almighty/files/main/surge/module/sspai-rss.sgmodule)
+- [重定向](https://raw.githubusercontent.com/tom2almighty/files/main/surge/module/redirect.sgmodule)
 
 ### 解锁模块
 
-- [MOZE](https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/moze.sgmodule)
-- [人人视频](https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/renrenshipin.sgmodule)
-- [slidebox](https://raw.githubusercontent.com/tom2almighty/files/main/Surge/module/slidebox.sgmodule)
+- [MOZE](https://raw.githubusercontent.com/tom2almighty/files/main/surge/module/moze.sgmodule)
+- [人人视频](https://raw.githubusercontent.com/tom2almighty/files/main/surge/module/renrenshipin.sgmodule)
+- [slidebox](https://raw.githubusercontent.com/tom2almighty/files/main/surge/module/slidebox.sgmodule)
 
 ## 免责申明
 
