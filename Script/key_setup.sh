@@ -36,6 +36,17 @@ log_success() { echo -e "${GREEN}[SUCCESS]${NC} $1"; }
 log_warning() { echo -e "${YELLOW}[WARNING]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 
+# 获取SSH服务名（兼容 Debian/Ubuntu 的 ssh 和 CentOS/RHEL 的 sshd）
+get_ssh_service() {
+    if systemctl list-unit-files sshd.service 2>/dev/null | grep -q "^sshd\.service"; then
+        echo "sshd"
+    elif systemctl list-unit-files ssh.service 2>/dev/null | grep -q "^ssh\.service"; then
+        echo "ssh"
+    else
+        echo "sshd"
+    fi
+}
+
 # 检查是否为root用户
 check_root() {
     if [[ $EUID -ne 0 ]]; then
@@ -48,10 +59,12 @@ check_root() {
 # 安全检查函数
 security_checks() {
     log_info "执行安全检查..."
+    local ssh_service
+    ssh_service=$(get_ssh_service)
     
     # 检查SSH服务状态
-    if ! systemctl is-active --quiet sshd; then
-        log_warning "SSH服务未运行"
+    if ! systemctl is-active --quiet "$ssh_service"; then
+        log_warning "SSH服务未运行: $ssh_service"
         return 0
     fi
     
@@ -323,7 +336,9 @@ restore_backup() {
     fi
     
     # 重启SSH服务
-    if systemctl restart sshd; then
+    local ssh_service
+    ssh_service=$(get_ssh_service)
+    if systemctl restart "$ssh_service"; then
         log_success "SSH服务重启成功"
     else
         log_error "SSH服务重启失败"
@@ -550,24 +565,24 @@ configure_ssh() {
         return 1
     fi
     
-    # 配置项数组：模式 -> 替换内容
+    # 配置项数组：配置项 -> 目标内容
     local configs=(
-        "PermitRootLogin.*|PermitRootLogin yes"
-        "PubkeyAuthentication.*|PubkeyAuthentication yes"
-        "AuthorizedKeysFile.*|AuthorizedKeysFile      .ssh/authorized_keys"
-        "PasswordAuthentication.*|PasswordAuthentication no"
+        "PermitRootLogin|PermitRootLogin yes"
+        "PubkeyAuthentication|PubkeyAuthentication yes"
+        "AuthorizedKeysFile|AuthorizedKeysFile .ssh/authorized_keys"
+        "PasswordAuthentication|PasswordAuthentication no"
+        "KbdInteractiveAuthentication|KbdInteractiveAuthentication no"
     )
     
     # 批量修改配置
     for config in "${configs[@]}"; do
-        local pattern="${config%%|*}"
+        local keyword="${config%%|*}"
         local replacement="${config#*|}"
         
-        if grep -q "^#*${pattern%.*}" "$config_file"; then
-            # 使用|作为sed分隔符，避免路径中的/冲突
-            sed -i "s|^#*${pattern}|${replacement}|" "$config_file"
+        if grep -Eq "^[[:space:]]*#?[[:space:]]*${keyword}([[:space:]]+|$)" "$config_file"; then
+            sed -i -E "s|^[[:space:]]*#?[[:space:]]*${keyword}([[:space:]].*)?$|${replacement}|" "$config_file"
         else
-            echo "${replacement#* }" >> "$config_file"
+            echo "$replacement" >> "$config_file"
         fi
     done
     
@@ -690,6 +705,10 @@ check_config_conflicts() {
     if grep -q "^[[:space:]]*PasswordAuthentication[[:space:]]\+yes" "$file"; then
         conflicts+=("PasswordAuthentication yes")
     fi
+
+    if grep -q "^[[:space:]]*KbdInteractiveAuthentication[[:space:]]\+yes" "$file"; then
+        conflicts+=("KbdInteractiveAuthentication yes")
+    fi
     
     if grep -q "^[[:space:]]*AuthorizedKeysFile[[:space:]]\+" "$file"; then
         local auth_keys_value=$(grep "^[[:space:]]*AuthorizedKeysFile" "$file" | head -1 | awk '{print $2}')
@@ -708,29 +727,76 @@ test_ssh_config() {
     
     if sshd -t; then
         log_success "SSH配置文件语法检查通过"
-        return 0
     else
         log_error "SSH配置文件语法错误"
         return 1
     fi
+
+    validate_effective_ssh_config
+}
+
+# 检查最终生效的SSH配置
+validate_effective_ssh_config() {
+    log_info "检查SSH最终生效配置..."
+    local effective_config
+    local failed=false
+
+    if ! effective_config=$(sshd -T 2>/dev/null); then
+        log_error "无法读取SSH最终生效配置"
+        return 1
+    fi
+
+    if ! grep -q "^pubkeyauthentication yes$" <<< "$effective_config"; then
+        log_error "最终配置未启用密钥认证: PubkeyAuthentication yes"
+        failed=true
+    fi
+
+    if ! grep -q "^passwordauthentication no$" <<< "$effective_config"; then
+        log_error "最终配置未禁用密码认证: PasswordAuthentication no"
+        failed=true
+    fi
+
+    if grep -q "^kbdinteractiveauthentication " <<< "$effective_config" && ! grep -q "^kbdinteractiveauthentication no$" <<< "$effective_config"; then
+        log_error "最终配置未禁用键盘交互认证: KbdInteractiveAuthentication no"
+        failed=true
+    fi
+
+    if ! grep -q "^permitrootlogin yes$" <<< "$effective_config"; then
+        log_error "最终配置未允许root登录: PermitRootLogin yes"
+        failed=true
+    fi
+
+    if ! grep -q "^authorizedkeysfile .*\.ssh/authorized_keys" <<< "$effective_config"; then
+        log_error "最终配置未使用预期authorized_keys路径: AuthorizedKeysFile .ssh/authorized_keys"
+        failed=true
+    fi
+
+    if [[ "$failed" == true ]]; then
+        return 1
+    fi
+
+    log_success "SSH最终生效配置检查通过"
+    return 0
 }
 
 # 重启SSH服务
 restart_ssh() {
     log_info "重启SSH服务..."
+    local ssh_service
+    ssh_service=$(get_ssh_service)
     
-    if systemctl restart sshd; then
-        log_success "SSH服务重启成功"
+    if systemctl restart "$ssh_service"; then
+        log_success "SSH服务重启成功: $ssh_service"
     else
-        log_error "SSH服务重启失败"
+        log_error "SSH服务重启失败: $ssh_service"
         return 1
     fi
     
     # 检查服务状态
-    if systemctl is-active --quiet sshd; then
-        log_success "SSH服务运行正常"
+    if systemctl is-active --quiet "$ssh_service"; then
+        log_success "SSH服务运行正常: $ssh_service"
     else
-        log_error "SSH服务运行异常"
+        log_error "SSH服务运行异常: $ssh_service"
         return 1
     fi
 }
