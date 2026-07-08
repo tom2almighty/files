@@ -11,3 +11,6 @@ IP-CIDR,209.141.61.153/32,no-resolve
 
 # UHD
 DOMAIN-SUFFIX,uhdnow.com
+
+# HXD
+DOMAIN-SUFFIX,as174.de
