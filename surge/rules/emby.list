@@ -2,7 +2,8 @@
 DOMAIN,local.loseremby.org
 DOMAIN,tw.loseremby.org
 DOMAIN,cfloacl.emby.moe
-DOMAIN,hd.xmsl.org
+# DOMAIN,hd.xmsl.org
+DOMAIN-SUFFIX,xmsl.org
 DOMAIN-SUFFIX,19991998.xyz
 DOMAIN-SUFFIX,xxlb.net
 DOMAIN-SUFFIX,zabc.net
