@@ -26,22 +26,54 @@ PUBLIC_KEY=''
 declare -a SSH_FILES=()
 declare -A SEEN_FILES=()
 
-info() { printf '[INFO] %s\n' "$*"; }
-warn() { printf '[提示] %s\n' "$*" >&2; }
-error() { printf '[错误] %s\n' "$*" >&2; }
+# 按实际输出通道判断颜色，重定向、命令替换和 NO_COLOR 模式保留纯文本。
+styled_text() {
+    if [[ -t 1 && ${TERM:-dumb} != dumb && -z ${NO_COLOR:-} ]]; then
+        printf '\033[%sm%s\033[0m' "$1" "$2"
+    else
+        printf '%s' "$2"
+    fi
+}
+
+info() { styled_text '32' "[提示] $*"; printf '\n'; }
+warn() { { styled_text '33' "[注意] $*"; printf '\n'; } >&2; }
+error() { { styled_text '1;31' "[错误] $*"; printf '\n'; } >&2; }
+
+section() {
+    printf '\n'
+    styled_text '1;36' "  ── $* ──"
+    printf '\n'
+}
+
+detail() {
+    printf '  %s：' "$1"
+    styled_text '1;32' "$2"
+    printf '\n'
+}
+
+menu_item() {
+    printf '  '
+    styled_text '1;32' "$1)"
+    printf ' %s\n' "$2"
+}
+
+menu_hint() {
+    styled_text '2' "  $*"
+    printf '\n'
+}
 
 # 独立输入通道支持 curl ... | bash；EOF 会返回失败，不在菜单中无限循环。
 ask() {
     local name=$1 prompt=$2 default=${3-} reply
-    printf '%s' "$prompt" >&2
-    IFS= read -r -u 3 reply || return 1
+    styled_text '1;32' "$prompt" >&2
+    IFS= read -r -u 3 reply || { printf '\n' >&2; return 1; }
     printf -v "$name" '%s' "${reply:-$default}"
 }
 
 confirm() {
     local answer
-    ask answer "$1 [y/N]: " N || return 1
-    [[ $answer == [yY] ]]
+    ask answer "$1 [y/N，回车取消]：" N || return 1
+    [[ $answer == [yY] || $answer == [yY][eE][sS] ]]
 }
 
 require() {
@@ -307,7 +339,10 @@ read_public_key() {
 
 generate_keypair() {
     local type directory protection
-    ask type '密钥类型：1) ED25519  2) RSA 4096 [1]：' 1 || return 1
+    section '选择密钥类型'
+    menu_item 1 'ED25519（推荐）'
+    menu_item 2 'RSA 4096'
+    ask type '请选择密钥类型 [1，回车使用默认值]：' 1 || return 1
     [[ $type == 1 || $type == 2 ]] || { error '无效的密钥类型。'; return 1; }
     mkdir -p "$ROOT_HOME/.ssh" && chmod 700 "$ROOT_HOME/.ssh" || return 1
     directory=$(mktemp -d "$ROOT_HOME/.ssh/vps-key.XXXXXX") || return 1
@@ -318,7 +353,7 @@ generate_keypair() {
     ssh-keygen "${args[@]}" <&3 || return 1
     PUBLIC_KEY=$(cat "$directory/id_key.pub") || return 1
     info "密钥已保存到 $directory；私钥权限为 600。"
-    printf '公钥：%s\n' "$PUBLIC_KEY"
+    detail '公钥' "$PUBLIC_KEY"
     if confirm '显示私钥，以便复制并保存到本地'; then cat "$directory/id_key" || return 1; fi
     confirm '确认已将私钥保存到本地，继续配置并禁用密码登录' || return 1
 }
@@ -362,7 +397,7 @@ change_ssh_port() {
     if command -v selinuxenabled >/dev/null && selinuxenabled; then
         warn "SELinux 已启用，请确保 TCP $port 的端口类型为 ssh_port_t。"
     fi
-    confirm "确认将 SSH 监听端口改为 $port" || return 0
+    confirm "确认将 SSH 监听端口改为 $port" || { info '已取消修改 SSH 端口。'; return 0; }
     # 预先拒绝已被其它程序占用的端口，避免服务重载后才发现无法监听。
     require ss || return 1
     if [[ -n $(ss -H -ltn "sport = :$port") ]] &&
@@ -408,7 +443,10 @@ show_connection() {
         address=$(hostname -I | awk '{print $1}')
     fi
     port=$(sshd -T -f "$SSH_CONFIG" | awk '$1=="port" {print $2; exit}') || return 1
-    printf '连接示例：ssh -p %s -i /path/to/private_key root@%s\n' "$port" "${address:-服务器IP}"
+    section '连接信息'
+    detail 'SSH 端口' "$port"
+    detail '连接示例' "ssh -p $port -i /path/to/private_key root@${address:-服务器IP}"
+    menu_hint '请将 /path/to/private_key 替换为本地私钥路径。'
 }
 
 backup_ssh() {
@@ -432,7 +470,7 @@ restore_ssh() {
         error '无有效的 SSH 备份。'; return 1;
     }
     [[ $(cat "$source/kind") == ssh ]] || { error '请选择 SSH 备份目录。'; return 1; }
-    confirm "恢复 $source" || return 0
+    confirm "恢复 $source" || { info '已取消恢复 SSH 备份。'; return 0; }
     begin_transaction ssh || return 1
     while IFS=$'\t' read -r state file; do save_file "$file" || return 1; done < "$source/manifest"
     restore_files "$source" && sshd -t -f "$SSH_CONFIG" && apply_ssh_service && finish_transaction
@@ -538,20 +576,54 @@ configure_tcp_buffer() {
     done
     info "所选上限：$mib MiB = $maximum 字节（不足 1 字节向上取整）。"
     info "tcp_rmem / tcp_wmem 均设为：4096 131072 $maximum（最小值、初始值、上限）。"
-    confirm '保存并立即应用' || return 0
+    confirm '保存并立即应用' || { info '已取消设置 TCP 缓冲区。'; return 0; }
     apply_sysctl "net.ipv4.tcp_rmem=4096 131072 $maximum" "net.ipv4.tcp_wmem=4096 131072 $maximum"
 }
 
 show_status() {
+    local settings key value status=0
+    section 'SSH 登录配置'
     if command -v sshd >/dev/null && [[ -f $SSH_CONFIG ]]; then
-        info 'SSH 全局生效配置（具体用户还可能受 Match 影响）：'
-        sshd -t -f "$SSH_CONFIG" && sshd -T -f "$SSH_CONFIG" |
-            awk '$1 ~ /^(port|permitrootlogin|pubkeyauthentication|passwordauthentication|kbdinteractiveauthentication|authorizedkeysfile|authenticationmethods)$/ {print}'
+        menu_hint '以下为全局生效配置，具体用户还可能受 Match 影响。'
+        if sshd -t -f "$SSH_CONFIG" && settings=$(sshd -T -f "$SSH_CONFIG"); then
+            while read -r key value; do
+                case $key in
+                    port) detail 'SSH 端口' "$value" ;;
+                    permitrootlogin) detail 'root 登录策略' "$value" ;;
+                    pubkeyauthentication) detail '公钥认证' "$value" ;;
+                    passwordauthentication) detail '密码认证' "$value" ;;
+                    kbdinteractiveauthentication) detail '交互式认证' "$value" ;;
+                    authorizedkeysfile) detail '公钥文件' "$value" ;;
+                    authenticationmethods) detail '认证方式' "$value" ;;
+                esac
+            done <<< "$settings"
+        else
+            error '无法读取 SSH 生效配置，请检查上方错误。'
+            status=1
+        fi
+    else
+        warn '未找到 sshd 或 SSH 配置文件，跳过 SSH 状态。'
     fi
-    info '内核及当前网络参数：'
-    uname -r
-    sysctl net.core.default_qdisc net.ipv4.tcp_available_congestion_control \
-        net.ipv4.tcp_congestion_control net.ipv4.tcp_rmem net.ipv4.tcp_wmem
+    section '内核与网络参数'
+    detail '内核版本' "$(uname -r)"
+    require sysctl || return 1
+    for key in net.core.default_qdisc net.ipv4.tcp_available_congestion_control \
+        net.ipv4.tcp_congestion_control net.ipv4.tcp_rmem net.ipv4.tcp_wmem; do
+        if value=$(sysctl -n "$key"); then
+            case $key in
+                net.core.default_qdisc) detail '队列调度算法' "$value" ;;
+                net.ipv4.tcp_available_congestion_control) detail '可用拥塞控制算法' "$value" ;;
+                net.ipv4.tcp_congestion_control) detail '当前拥塞控制算法' "$value" ;;
+                net.ipv4.tcp_rmem) detail 'TCP 接收缓冲区（字节）' "$value" ;;
+                net.ipv4.tcp_wmem) detail 'TCP 发送缓冲区（字节）' "$value" ;;
+            esac
+        else
+            warn "无法读取 $key，当前内核可能不支持此参数。"
+            status=1
+        fi
+    done
+    menu_hint '缓冲区三个值依次为：最小值、初始值、上限。'
+    return "$status"
 }
 
 run_action() {
@@ -562,24 +634,46 @@ run_action() {
     return "$status"
 }
 
+show_menu() {
+    printf '\n'
+    styled_text '1;32' '  VPS 管理 · SSH / BBR / TCP'
+    printf '\n'
+    menu_hint '输入选项编号后按 Enter；0 或 q 退出。'
+
+    section 'SSH 登录与端口'
+    menu_item 1 '粘贴公钥并配置 root 密钥登录'
+    menu_item 2 '生成密钥对并配置 root 密钥登录'
+    menu_item 3 '修改 SSH 端口'
+    menu_hint '选项 1 / 2 会禁用密码登录。'
+
+    section '网络优化'
+    menu_item 4 '开启 BBR + fq'
+    menu_item 5 '恢复 TCP 缓冲区基准值'
+    menu_item 6 '按延迟和带宽计算 TCP 缓冲区'
+
+    section '状态查看'
+    menu_item 7 '查看 SSH / 内核 / 网络状态'
+
+    section 'SSH 备份与恢复'
+    menu_item 8 '备份 SSH 配置和公钥'
+    menu_item 9 '恢复 SSH 备份'
+
+    printf '\n'
+    menu_item 0 '退出'
+    menu_hint '绿色：提示与关键值  黄色：注意事项  红色：错误'
+    printf '\n'
+}
+
 main_menu() {
     local choice
     while true; do
-        cat <<'MENU'
-
-========== VPS 管理 ==========
- 1) 粘贴公钥并配置 root 密钥登录
- 2) 生成密钥对并配置 root 密钥登录
- 3) 修改 SSH 端口
- 4) 开启 BBR + fq
- 5) 恢复 TCP 缓冲区默认值
- 6) 按延迟和带宽计算 TCP 缓冲区
- 7) 查看 SSH / 内核状态
- 8) 备份 SSH 配置和公钥
- 9) 恢复 SSH 备份
- 0) 退出
-MENU
-        ask choice '请选择：' || return 0
+        show_menu
+        ask choice '请选择 [0-9 / q]：' || return 0
+        # 允许粘贴编号时带有首尾空格，不影响公钥、路径等其它输入。
+        choice=${choice#"${choice%%[![:space:]]*}"}
+        choice=${choice%"${choice##*[![:space:]]}"}
+        [[ -n $choice ]] || continue
+        printf '\n'
         case $choice in
             1) run_action configure_keys paste || true ;;
             2) run_action configure_keys generate || true ;;
@@ -590,27 +684,41 @@ MENU
             7) run_action show_status || true ;;
             8) run_action backup_ssh || true ;;
             9) run_action restore_ssh || true ;;
-            0) return 0 ;;
-            *) warn '无效选项，请重新输入。' ;;
+            0|q|Q) info '已退出 VPS 管理。'; return 0 ;;
+            *) warn '无效选项，请输入 0-9，或输入 q 退出。'; continue ;;
         esac
+        printf '\n'
+        ask choice '按 Enter 返回主菜单，或输入 q 退出：' || return 0
+        if [[ $choice == [qQ] || $choice == 0 ]]; then
+            info '已退出 VPS 管理。'
+            return 0
+        fi
     done
 }
 
 main() {
     case ${1:---menu} in
         -h|--help)
+            section 'VPS SSH / BBR / TCP 管理工具'
+            info '用法：sudo bash vps_setup.sh [选项]'
+            section '运行选项'
             cat <<'HELP'
-VPS SSH / BBR / TCP 管理工具
-用法：sudo bash vps_setup.sh [选项]
   --menu          交互式菜单（默认）
   --quick         粘贴公钥，配置 root 密钥登录并禁用密码登录
   --bbr           启用并持久化 BBR + fq（不安装或更换内核）
   --tcp-defaults  恢复指定的 TCP 缓冲区基准并持久化
   --help, -h      显示帮助
-配置位置：SSH 优先使用 sshd_config.d/00-vps-setup.conf；
-          网络参数使用 /etc/sysctl.d/99-vps-setup.conf。
-备份位置：/var/backups/vps-setup/；SSH 配置修改失败自动回滚。
 HELP
+            section '配置与备份'
+            detail 'SSH 配置' '优先使用 sshd_config.d/00-vps-setup.conf'
+            detail '网络参数' "$SYSCTL_CONFIG"
+            detail '备份位置' "$BACKUP_ROOT/"
+            info 'SSH 配置修改失败自动回滚。'
+            section '交互说明'
+            menu_hint '输入编号选择功能；0 或 q 退出；操作后按 Enter 返回菜单。'
+            menu_hint '确认操作默认选 N（取消），输入 y / yes 确认。'
+            menu_hint '颜色：绿色提示与关键值，黄色注意事项，红色错误。'
+            menu_hint '设置 NO_COLOR=1 可关闭颜色；重定向输出时自动使用纯文本。'
             return 0 ;;
         --menu|--quick|--bbr|--tcp-defaults) ;;
         *) error "未知选项：$1"; return 1 ;;
