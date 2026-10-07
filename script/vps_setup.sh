@@ -22,7 +22,12 @@ SSH_SOCKET=''
 SOCKET_CONFIG=''
 SERVICE_TOUCHED=0
 SSH_TARGET=''
+SSH_PORT_TARGET=''
+SSH_PORT_INCLUDED=0
 PUBLIC_KEY=''
+SCRIPT_SOURCE=${BASH_SOURCE[0]}
+SCRIPT_UPDATE_URL='https://raw.githubusercontent.com/tom2almighty/files/main/script/vps_setup.sh'
+SCRIPT_UPDATED=0
 declare -a SSH_FILES=()
 declare -A SEEN_FILES=()
 
@@ -254,7 +259,17 @@ prepare_ssh() {
             break
         fi
     done < <(include_patterns "$SSH_CONFIG" 1)
-    info "SSH 配置写入：$SSH_TARGET"
+    directory="$(dirname "$SSH_CONFIG")/sshd_config.d"
+    [[ $SSH_TARGET == "$SSH_CONFIG" ]] || directory=$(dirname "$SSH_TARGET")
+    SSH_PORT_TARGET="$directory/00-vps-setup-port.conf"
+    SSH_PORT_INCLUDED=0
+    while IFS= read -r pattern; do
+        [[ $pattern == /* ]] || pattern="$(dirname "$SSH_CONFIG")/$pattern"
+        # shellcheck disable=SC2053
+        if [[ $SSH_PORT_TARGET == $pattern ]]; then SSH_PORT_INCLUDED=1; break; fi
+    done < <(include_patterns "$SSH_CONFIG" 1)
+    info "SSH 登录配置：$SSH_TARGET"
+    info "SSH 端口配置：$SSH_PORT_TARGET"
 }
 
 # 保留上次管理的其它项；没有有效的全局 Include 时，将块放到主配置开头。
@@ -280,6 +295,16 @@ update_ssh_settings() {
     content="$BLOCK_START"$'\n'"$settings"$'\n'"$BLOCK_END"
     [[ -z $rest ]] || content+=$'\n'"$rest"
     write_file "$SSH_TARGET" "$content"
+}
+
+# 端口始终写入独立文件；无匹配的全局 Include 时，在主配置开头显式引用。
+update_ssh_port() {
+    local SSH_TARGET=$SSH_PORT_TARGET content
+    update_ssh_settings "Port $1" || return 1
+    if (( ! SSH_PORT_INCLUDED )); then
+        content=$(cat "$SSH_CONFIG") || return 1
+        write_file "$SSH_CONFIG" "Include \"$SSH_PORT_TARGET\""$'\n'"$content" || return 1
+    fi
 }
 
 # 校验全局配置以及当前连接的 root Match 上下文；优先级冲突时不会继续应用。
@@ -407,12 +432,14 @@ change_ssh_port() {
     begin_transaction ssh || return 1
     # Port 可以累加，必须处理实际 Include 链中的旧声明。
     for file in "${SSH_FILES[@]}"; do
+        # 独立端口文件由 update_ssh_port 更新，避免累积旧端口注释。
+        [[ $file != "$SSH_PORT_TARGET" ]] || continue
         if grep -Eiq '^[[:space:]]*Port([[:space:]]|=)' "$file"; then
             content=$(sed -E '/^[[:space:]]*[Pp][Oo][Rr][Tt]([[:space:]]|=)/s/^/# vps-setup old port: /' "$file") || return 1
             write_file "$file" "$content" || return 1
         fi
     done
-    update_ssh_settings "Port $port" || return 1
+    update_ssh_port "$port" || return 1
     if [[ -n $SSH_SOCKET ]]; then
         write_file "$SOCKET_CONFIG" "[Socket]
 ListenStream=
@@ -452,7 +479,7 @@ show_connection() {
 backup_ssh() {
     prepare_ssh && begin_transaction ssh || return 1
     local file
-    for file in "${SSH_FILES[@]}" "$SSH_TARGET" "$ROOT_HOME/.ssh/authorized_keys"; do
+    for file in "${SSH_FILES[@]}" "$SSH_TARGET" "$SSH_PORT_TARGET" "$ROOT_HOME/.ssh/authorized_keys"; do
         save_file "$file" || return 1
     done
     [[ -z $SOCKET_CONFIG ]] || save_file "$SOCKET_CONFIG" || return 1
@@ -547,37 +574,111 @@ mib_to_bytes() {
     [[ $mib =~ ^[0-9]+([.][0-9]+)?$ && ${#mib} -le 15 ]] || return 1
     awk -v mib="$mib" 'BEGIN {
         bytes=mib*1048576
-        # 上限不能小于 tcp_rmem/tcp_wmem 的初始值，也不能超出内核整数范围。
-        if(bytes<131072 || bytes>2147483647) exit 1
+        # 与当前最小值、默认值的比较由调用方完成。
+        if(bytes<1 || bytes>2147483647) exit 1
         rounded=int(bytes); if(bytes>rounded) rounded++
         printf "%.0f\n", rounded
     }'
 }
 
 configure_tcp_buffer() {
-    local rtt bandwidth required recommended mib maximum
-    ask rtt '往返延迟 RTT（ping 延迟，单位 ms）：' || return 1
-    ask bandwidth '目标带宽（单位 Mbps，1 Gbps = 1000 Mbps）：' || return 1
-    required=$(calculate_tcp_buffer "$rtt" "$bandwidth") || {
-        error '请输入正数；计算结果不得超过 2147483647 字节。'; return 1;
-    }
-    recommended=$(((required + 1048575) / 1048576))
-    info "带宽时延积：$bandwidth × $rtt × 125 = $required 字节（不足 1 字节向上取整）。"
-    if (( recommended * 1048576 <= 2147483647 )); then
-        info "推荐上限：$recommended MiB（向上取整到刚好覆盖计算值的整数 MiB）。"
-    else
-        warn '计算值接近内核上限，向上取整到整数 MiB 后会超限，请手动选择较小值。'
+    local rtt bandwidth required recommended mib maximum key current minimum=0 value
+    local -a rmem=() wmem=() values=()
+    require sysctl || return 1
+    for key in tcp_rmem tcp_wmem; do
+        current=$(sysctl -n "net.ipv4.$key") || return 1
+        read -r -a values <<< "$current"
+        [[ ${#values[@]} == 3 ]] || { error "$key 当前值格式无效。"; return 1; }
+        for value in "${values[@]}"; do
+            [[ $value =~ ^[0-9]{1,10}$ ]] && (( 10#$value <= 2147483647 )) || {
+                error "$key 当前值格式无效。"; return 1;
+            }
+        done
+        # 分别保留接收与发送缓冲区现有的最小值和默认值。
+        if [[ $key == tcp_rmem ]]; then rmem=("${values[@]}"); else wmem=("${values[@]}"); fi
+        for value in "${values[@]:0:2}"; do
+            (( 10#$value <= minimum )) || minimum=$((10#$value))
+        done
+        info "当前 $key：${values[*]}（最小值、默认值、上限）。"
+    done
+    info "本次仅修改上限，保留两项各自的最小值和默认值；上限不得低于 $minimum 字节。"
+    if [[ ${1:-calculate} != direct ]]; then
+        ask rtt '往返延迟 RTT（ping 延迟，单位 ms）：' || return 1
+        ask bandwidth '目标带宽（单位 Mbps，1 Gbps = 1000 Mbps）：' || return 1
+        required=$(calculate_tcp_buffer "$rtt" "$bandwidth") || {
+            error '请输入正数；计算结果不得超过 2147483647 字节。'; return 1;
+        }
+        recommended=$(((required + 1048575) / 1048576))
+        info "带宽时延积：$bandwidth × $rtt × 125 = $required 字节（不足 1 字节向上取整）。"
+        if (( recommended * 1048576 <= 2147483647 )); then
+            info "推荐上限：$recommended MiB（向上取整到刚好覆盖计算值的整数 MiB）。"
+        else
+            warn '计算值接近内核上限，向上取整到整数 MiB 后会超限，请手动选择较小值。'
+        fi
     fi
     info '1 MiB = 1048576 字节；可按需要手动输入整数或小数 MiB。'
     while true; do
-        ask mib '请输入要设置的缓冲区上限（MiB，至少 0.125）：' || return 1
-        if maximum=$(mib_to_bytes "$mib"); then break; fi
-        error '请输入有效的 MiB 数值；换算结果须为 131072–2147483647 字节。'
+        ask mib '请输入要设置的缓冲区上限（MiB）：' || return 1
+        if maximum=$(mib_to_bytes "$mib") && (( maximum >= minimum )); then break; fi
+        error "请输入有效的 MiB 数值；换算结果须为 $minimum–2147483647 字节，不能小于当前最小值或默认值。"
     done
     info "所选上限：$mib MiB = $maximum 字节（不足 1 字节向上取整）。"
-    info "tcp_rmem / tcp_wmem 均设为：4096 131072 $maximum（最小值、初始值、上限）。"
+    info "tcp_rmem 将设为：${rmem[0]} ${rmem[1]} $maximum。"
+    info "tcp_wmem 将设为：${wmem[0]} ${wmem[1]} $maximum。"
     confirm '保存并立即应用' || { info '已取消设置 TCP 缓冲区。'; return 0; }
-    apply_sysctl "net.ipv4.tcp_rmem=4096 131072 $maximum" "net.ipv4.tcp_wmem=4096 131072 $maximum"
+    apply_sysctl "net.ipv4.tcp_rmem=${rmem[0]} ${rmem[1]} $maximum" "net.ipv4.tcp_wmem=${wmem[0]} ${wmem[1]} $maximum"
+}
+
+# 在子进程中清理下载文件，失败或中断时保留正在运行的脚本。
+download_script_update() (
+    local target=$1 temp='' backup=''
+    trap '[[ -z $temp ]] || rm -f -- "$temp"' EXIT
+    trap 'exit 130' INT
+    trap 'exit 143' TERM
+    temp=$(mktemp "${target}.update.XXXXXX") || return 1
+    info '正在从 GitHub 下载最新脚本…'
+    curl -fsSL --proto '=https' --proto-redir '=https' \
+        --connect-timeout 10 --max-time 120 --retry 2 --retry-max-time 180 \
+        "$SCRIPT_UPDATE_URL" -o "$temp" || { error '下载失败，原脚本未修改。'; return 1; }
+    if [[ ! -s $temp ]] || ! bash -n "$temp" ||
+        ! grep -Fqx '# VPS SSH / BBR / TCP 管理。需要 Bash 4+；SSH 服务管理使用 systemd。' "$temp"; then
+        error '下载内容不是有效的 VPS 管理脚本，原脚本未修改。'; return 1
+    fi
+    if cmp -s -- "$target" "$temp"; then return 2; fi
+    chmod --reference="$target" "$temp" && chown --reference="$target" "$temp" || return 1
+    backup=$(mktemp "${target}.bak.XXXXXX") || return 1
+    if ! cp -p -- "$target" "$backup"; then
+        rm -f -- "$backup"
+        error '备份失败，原脚本未修改。'; return 1
+    fi
+    info "旧版本备份：$backup"
+    # 同目录原子替换，避免下载中断或当前 Bash 继续读取到半份脚本。
+    mv -f -- "$temp" "$target" || return 1
+)
+
+update_script() {
+    local target status=0
+    SCRIPT_UPDATED=0
+    require curl bash readlink mktemp cmp cp chmod chown mv || return 1
+    target=$(readlink -f -- "$SCRIPT_SOURCE") || return 1
+    [[ -f $target && -w $target ]] || {
+        error '未找到可更新的本地脚本，请先下载为 vps_setup.sh，再使用 bash vps_setup.sh 运行。'
+        return 1
+    }
+    section '更新 VPS 管理脚本'
+    detail '更新地址' "$SCRIPT_UPDATE_URL"
+    detail '本地脚本' "$target"
+    info '更新前备份当前脚本；更新成功后退出菜单，重新运行即可使用新版。'
+    confirm '下载并更新脚本' || { info '已取消更新。'; return 0; }
+    download_script_update "$target" || status=$?
+    case $status in
+        0)
+            SCRIPT_UPDATED=1
+            info '脚本已更新。请重新运行：'
+            printf '  bash %q\n' "$target" ;;
+        2) info '本地脚本与远端一致，无需更新。' ;;
+        *) return "$status" ;;
+    esac
 }
 
 show_status() {
@@ -650,16 +751,19 @@ show_menu() {
     menu_item 4 '开启 BBR + fq'
     menu_item 5 '恢复 TCP 缓冲区基准值'
     menu_item 6 '按延迟和带宽计算 TCP 缓冲区'
+    menu_item 7 '直接设置 TCP 缓冲区最大值（MiB）'
 
     section '状态查看'
-    menu_item 7 '查看 SSH / 内核 / 网络状态'
+    menu_item 8 '查看 SSH / 内核 / 网络状态'
 
     section 'SSH 备份与恢复'
-    menu_item 8 '备份 SSH 配置和公钥'
-    menu_item 9 '恢复 SSH 备份'
+    menu_item 9 '备份 SSH 配置和公钥'
+    menu_item 10 '恢复 SSH 备份'
 
-    printf '\n'
+    section '脚本更新与退出'
+    menu_item 11 '更新脚本（GitHub 最新版）'
     menu_item 0 '退出'
+    printf '\n'
     menu_hint '绿色：提示与关键值  黄色：注意事项  红色：错误'
     printf '\n'
 }
@@ -668,7 +772,7 @@ main_menu() {
     local choice
     while true; do
         show_menu
-        ask choice '请选择 [0-9 / q]：' || return 0
+        ask choice '请选择 [0-11 / q]：' || return 0
         # 允许粘贴编号时带有首尾空格，不影响公钥、路径等其它输入。
         choice=${choice#"${choice%%[![:space:]]*}"}
         choice=${choice%"${choice##*[![:space:]]}"}
@@ -681,11 +785,15 @@ main_menu() {
             4) run_action enable_bbr || true ;;
             5) run_action restore_tcp_defaults || true ;;
             6) run_action configure_tcp_buffer || true ;;
-            7) run_action show_status || true ;;
-            8) run_action backup_ssh || true ;;
-            9) run_action restore_ssh || true ;;
+            7) run_action configure_tcp_buffer direct || true ;;
+            8) run_action show_status || true ;;
+            9) run_action backup_ssh || true ;;
+            10) run_action restore_ssh || true ;;
+            11)
+                run_action update_script || true
+                (( SCRIPT_UPDATED == 0 )) || return 0 ;;
             0|q|Q) info '已退出 VPS 管理。'; return 0 ;;
-            *) warn '无效选项，请输入 0-9，或输入 q 退出。'; continue ;;
+            *) warn '无效选项，请输入 0-11，或输入 q 退出。'; continue ;;
         esac
         printf '\n'
         ask choice '按 Enter 返回主菜单，或输入 q 退出：' || return 0
@@ -711,11 +819,13 @@ main() {
 HELP
             section '配置与备份'
             detail 'SSH 配置' '优先使用 sshd_config.d/00-vps-setup.conf'
+            detail 'SSH 端口' '独立使用 sshd_config.d/00-vps-setup-port.conf'
             detail '网络参数' "$SYSCTL_CONFIG"
             detail '备份位置' "$BACKUP_ROOT/"
             info 'SSH 配置修改失败自动回滚。'
             section '交互说明'
             menu_hint '输入编号选择功能；0 或 q 退出；操作后按 Enter 返回菜单。'
+            menu_hint '选项 7 直接输入 TCP 上限（MiB）；选项 11 从 GitHub 更新本地脚本。'
             menu_hint '确认操作默认选 N（取消），输入 y / yes 确认。'
             menu_hint '颜色：绿色提示与关键值，黄色注意事项，红色错误。'
             menu_hint '设置 NO_COLOR=1 可关闭颜色；重定向输出时自动使用纯文本。'
