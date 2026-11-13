@@ -1,9 +1,0 @@
-#!name=slidebox
-#!desc=slidebox 会员解锁\n脚本作者 chxm1023
-#!category=🪄 会员
-
-[Body Rewrite]
-http-response-jq ^https?:\/\/.*-slidebox-ios-prod\.cloudfunctions\.net\/api_v1 '. = {"data":{"env":{"projectId":"slidebox-ios-prod","region":"asia-east2","function":"api_v1","realm":"prod"},"appStoreRecord":{"purchases":[{"productId":"co.slidebox.iap.apple.fullversion"}],"subscriptions":[],"validatedTimestampMs":"1699365288625","bundleId":"co.slidebox.Slidebox"}}}'
-
-[MITM]
-hostname = %APPEND% *-slidebox-ios-prod.cloudfunctions.net

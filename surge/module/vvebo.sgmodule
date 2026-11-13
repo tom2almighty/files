@@ -1,6 +1,6 @@
 #!name = 修复 VVebo 用户页面
 #!desc = 修复VVebo失效的用户页面，需要打开Mitm，感谢@suiyuran。
-#!category=🛠️ 工具
+#!category=工具
 #!author=suiyuran
 
 
