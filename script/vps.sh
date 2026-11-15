@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # VPS SSH / BBR / TCP 管理。需要 Bash 4+；SSH 服务管理使用 systemd。
-# 用法：sudo bash vps_setup.sh [--menu|--quick|--bbr|--tcp-defaults|--help]
+# 用法：sudo bash vps.sh [--menu|--quick|--bbr|--tcp-defaults|--help]
 # TCP 推荐值 = ceil(带宽 Mbps × RTT ms × 125 / 1048576) MiB；实际上限由用户输入。
 
 set -uo pipefail
@@ -26,7 +26,7 @@ SSH_PORT_TARGET=''
 SSH_PORT_INCLUDED=0
 PUBLIC_KEY=''
 SCRIPT_SOURCE=${BASH_SOURCE[0]}
-SCRIPT_UPDATE_URL='https://raw.githubusercontent.com/tom2almighty/files/main/script/vps_setup.sh'
+SCRIPT_UPDATE_URL='https://raw.githubusercontent.com/tom2almighty/files/main/script/vps.sh'
 SCRIPT_UPDATED=0
 declare -a SSH_FILES=()
 declare -A SEEN_FILES=()
@@ -44,22 +44,65 @@ info() { styled_text '32' "[提示] $*"; printf '\n'; }
 warn() { { styled_text '33' "[注意] $*"; printf '\n'; } >&2; }
 error() { { styled_text '1;31' "[错误] $*"; printf '\n'; } >&2; }
 
+banner() {
+    printf '\n'
+    styled_text '1;36' '=================================================='
+    printf '\n'
+    styled_text '1;32' "  $*"
+    printf '\n'
+    styled_text '1;36' '=================================================='
+    printf '\n'
+}
+
+rule() {
+    styled_text '2' '--------------------------------------------------'
+    printf '\n'
+}
+
 section() {
     printf '\n'
     styled_text '1;36' "  ── $* ──"
     printf '\n'
 }
 
+# 在 LC_ALL=C 下估算 UTF-8 字符串显示宽度，用于对齐详情标签。
+display_width() {
+    local s=$1 i=0 len=${#1} w=0 b
+    while (( i < len )); do
+        printf -v b '%d' "'${s:i:1}"
+        if (( b < 128 )); then
+            (( w += 1, i += 1 ))
+        elif (( b < 224 )); then
+            (( w += 1, i += 2 ))
+        elif (( b < 240 )); then
+            (( w += 2, i += 3 ))
+        else
+            (( w += 2, i += 4 ))
+        fi
+    done
+    REPLY=$w
+}
+
 detail() {
-    printf '  %s：' "$1"
-    styled_text '1;32' "$2"
+    local label=$1 value=$2 pad=0 width=18
+    display_width "$label"
+    if (( REPLY < width )); then pad=$((width - REPLY)); fi
+    printf '  %s%*s' "$label" "$pad" ''
+    styled_text '1;32' "$value"
     printf '\n'
 }
 
 menu_item() {
+    local tag="$1)"
     printf '  '
-    styled_text '1;32' "$1)"
-    printf ' %s\n' "$2"
+    styled_text '1;32' "$(printf '%-4s' "$tag")"
+    printf '%s\n' "$2"
+}
+
+help_item() {
+    printf '  '
+    styled_text '1;32' "$(printf '%-16s' "$1")"
+    printf '%s\n' "$2"
 }
 
 menu_hint() {
@@ -78,7 +121,7 @@ ask() {
 confirm() {
     local answer
     ask answer "$1 [y/N，回车取消]：" N || return 1
-    [[ $answer == [yY] || $answer == [yY][eE][sS] ]]
+    [[ ${answer,,} == y || ${answer,,} == yes ]]
 }
 
 require() {
@@ -268,8 +311,8 @@ prepare_ssh() {
         # shellcheck disable=SC2053
         if [[ $SSH_PORT_TARGET == $pattern ]]; then SSH_PORT_INCLUDED=1; break; fi
     done < <(include_patterns "$SSH_CONFIG" 1)
-    info "SSH 登录配置：$SSH_TARGET"
-    info "SSH 端口配置：$SSH_PORT_TARGET"
+    detail 'SSH 登录配置' "$SSH_TARGET"
+    detail 'SSH 端口配置' "$SSH_PORT_TARGET"
 }
 
 # 保留上次管理的其它项；没有有效的全局 Include 时，将块放到主配置开头。
@@ -353,7 +396,12 @@ apply_ssh_service() {
 read_public_key() {
     local temp
     ask PUBLIC_KEY '粘贴完整 SSH 公钥（单行）：' || return 1
-    [[ -n $PUBLIC_KEY && $PUBLIC_KEY != *$'\n'* ]] || return 1
+    PUBLIC_KEY=${PUBLIC_KEY#"${PUBLIC_KEY%%[![:space:]]*}"}
+    PUBLIC_KEY=${PUBLIC_KEY%"${PUBLIC_KEY##*[![:space:]]}"}
+    if [[ -z $PUBLIC_KEY ]]; then
+        error '公钥不能为空。'; return 1
+    fi
+    [[ $PUBLIC_KEY != *$'\n'* ]] || { error '公钥必须为单行。'; return 1; }
     temp=$(mktemp) || return 1
     printf '%s\n' "$PUBLIC_KEY" > "$temp" || { rm -f -- "$temp"; return 1; }
     if ! ssh-keygen -l -f "$temp"; then
@@ -373,14 +421,17 @@ generate_keypair() {
     directory=$(mktemp -d "$ROOT_HOME/.ssh/vps-key.XXXXXX") || return 1
     local -a args=(-t ed25519 -f "$directory/id_key" -C "root@$(hostname)")
     [[ $type != 2 ]] || args=(-t rsa -b 4096 -f "$directory/id_key" -C "root@$(hostname)")
-    ask protection '为私钥设置密码？[Y/n]：' Y || return 1
-    [[ $protection != [nN] ]] || args+=(-N '')
+    ask protection '是否为私钥设置密码？[Y/n，回车默认设置]：' Y || return 1
+    [[ ${protection,,} != n && ${protection,,} != no ]] || args+=(-N '')
     ssh-keygen "${args[@]}" <&3 || return 1
     PUBLIC_KEY=$(cat "$directory/id_key.pub") || return 1
     info "密钥已保存到 $directory；私钥权限为 600。"
     detail '公钥' "$PUBLIC_KEY"
     if confirm '显示私钥，以便复制并保存到本地'; then cat "$directory/id_key" || return 1; fi
-    confirm '确认已将私钥保存到本地，继续配置并禁用密码登录' || return 1
+    if ! confirm '确认已将私钥保存到本地，继续配置并禁用密码登录'; then
+        info '已取消配置 SSH 密钥登录。'
+        return 2
+    fi
 }
 
 install_public_key() {
@@ -394,8 +445,16 @@ install_public_key() {
 }
 
 configure_keys() {
+    local rc=0
+    section '配置 root 密钥登录'
     prepare_ssh || return 1
-    if [[ ${1:-paste} == generate ]]; then generate_keypair || return 1; else read_public_key || return 1; fi
+    if [[ ${1:-paste} == generate ]]; then
+        generate_keypair || rc=$?
+        if (( rc == 2 )); then return 0; fi
+        (( rc == 0 )) || return "$rc"
+    else
+        read_public_key || return 1
+    fi
     local -a settings=(
         'PermitRootLogin prohibit-password'
         'PubkeyAuthentication yes'
@@ -412,6 +471,7 @@ configure_keys() {
 }
 
 change_ssh_port() {
+    section '修改 SSH 端口'
     prepare_ssh || return 1
     local port file content
     ask port '新 SSH 端口（1-65535）：' || return 1
@@ -467,7 +527,7 @@ show_connection() {
     if [[ -n $address ]]; then
         read -r _ _ address _ <<< "$address"
     else
-        address=$(hostname -I | awk '{print $1}')
+        address=$(hostname -I 2>/dev/null | awk '{print $1}')
     fi
     port=$(sshd -T -f "$SSH_CONFIG" | awk '$1=="port" {print $2; exit}') || return 1
     section '连接信息'
@@ -477,6 +537,7 @@ show_connection() {
 }
 
 backup_ssh() {
+    section '备份 SSH 配置和公钥'
     prepare_ssh && begin_transaction ssh || return 1
     local file
     for file in "${SSH_FILES[@]}" "$SSH_TARGET" "$SSH_PORT_TARGET" "$ROOT_HOME/.ssh/authorized_keys"; do
@@ -489,6 +550,7 @@ backup_ssh() {
 }
 
 restore_ssh() {
+    section '恢复 SSH 备份'
     prepare_ssh restore || return 1
     local source='' state file
     [[ ! -f $BACKUP_ROOT/latest-ssh ]] || source=$(cat "$BACKUP_ROOT/latest-ssh")
@@ -540,6 +602,7 @@ apply_sysctl() {
 }
 
 enable_bbr() {
+    section '开启 BBR + fq'
     require sysctl || return 1
     local available
     available=$(sysctl -n net.ipv4.tcp_available_congestion_control) || return 1
@@ -548,11 +611,15 @@ enable_bbr() {
         available=$(sysctl -n net.ipv4.tcp_available_congestion_control) || return 1
     fi
     [[ " $available " == *' bbr '* ]] || { error '当前内核不支持 BBR。'; return 1; }
-    apply_sysctl 'net.core.default_qdisc=fq' 'net.ipv4.tcp_congestion_control=bbr'
+    apply_sysctl 'net.core.default_qdisc=fq' 'net.ipv4.tcp_congestion_control=bbr' || return 1
+    detail '队列调度算法' 'fq'
+    detail '拥塞控制算法' 'bbr'
 }
 
 restore_tcp_defaults() {
-    info '恢复指定基准：rmem="4096 131072 6291456"，wmem="4096 16384 4194304"。'
+    section '恢复 TCP 缓冲区默认基准'
+    detail '目标 tcp_rmem' '4096 131072 6291456'
+    detail '目标 tcp_wmem' '4096 16384 4194304'
     apply_sysctl 'net.ipv4.tcp_rmem=4096 131072 6291456' 'net.ipv4.tcp_wmem=4096 16384 4194304'
 }
 
@@ -582,8 +649,9 @@ mib_to_bytes() {
 }
 
 configure_tcp_buffer() {
-    local rtt bandwidth required recommended mib maximum key current minimum=0 value
+    local rtt bandwidth required recommended='' default_mib='' mib maximum key current minimum=0 value
     local -a rmem=() wmem=() values=()
+    section 'TCP 缓冲区配置'
     require sysctl || return 1
     for key in tcp_rmem tcp_wmem; do
         current=$(sysctl -n "net.ipv4.$key") || return 1
@@ -599,32 +667,43 @@ configure_tcp_buffer() {
         for value in "${values[@]:0:2}"; do
             (( 10#$value <= minimum )) || minimum=$((10#$value))
         done
-        info "当前 $key：${values[*]}（最小值、默认值、上限）。"
+        detail "当前 $key" "${values[*]}"
     done
-    info "本次仅修改上限，保留两项各自的最小值和默认值；上限不得低于 $minimum 字节。"
+    detail '最小允许上限' "$minimum 字节"
+    menu_hint '本次仅修改上限，保留两项各自的最小值和默认值（单位：字节）。'
     if [[ ${1:-calculate} != direct ]]; then
+        printf '\n'
         ask rtt '往返延迟 RTT（ping 延迟，单位 ms）：' || return 1
         ask bandwidth '目标带宽（单位 Mbps，1 Gbps = 1000 Mbps）：' || return 1
         required=$(calculate_tcp_buffer "$rtt" "$bandwidth") || {
             error '请输入正数；计算结果不得超过 2147483647 字节。'; return 1;
         }
         recommended=$(((required + 1048575) / 1048576))
-        info "带宽时延积：$bandwidth × $rtt × 125 = $required 字节（不足 1 字节向上取整）。"
+        printf '\n'
+        detail '带宽时延积' "$bandwidth × $rtt × 125 = $required 字节"
         if (( recommended * 1048576 <= 2147483647 )); then
-            info "推荐上限：$recommended MiB（向上取整到刚好覆盖计算值的整数 MiB）。"
+            detail '推荐上限' "$recommended MiB（向上取整）"
+            if (( recommended * 1048576 >= minimum )); then
+                default_mib=$recommended
+            fi
         else
-            warn '计算值接近内核上限，向上取整到整数 MiB 后会超限，请手动选择较小值。'
+            warn '计算值接近内核上限，向上取整到整数 MiB 后会超限，请手动输入较小值。'
         fi
     fi
-    info '1 MiB = 1048576 字节；可按需要手动输入整数或小数 MiB。'
+    menu_hint '1 MiB = 1048576 字节；支持输入整数或小数 MiB。'
     while true; do
-        ask mib '请输入要设置的缓冲区上限（MiB）：' || return 1
+        if [[ -n $default_mib ]]; then
+            ask mib "请输入要设置的缓冲区上限（MiB）[默认 $default_mib]：" "$default_mib" || return 1
+        else
+            ask mib '请输入要设置的缓冲区上限（MiB）：' || return 1
+        fi
         if maximum=$(mib_to_bytes "$mib") && (( maximum >= minimum )); then break; fi
         error "请输入有效的 MiB 数值；换算结果须为 $minimum–2147483647 字节，不能小于当前最小值或默认值。"
     done
-    info "所选上限：$mib MiB = $maximum 字节（不足 1 字节向上取整）。"
-    info "tcp_rmem 将设为：${rmem[0]} ${rmem[1]} $maximum。"
-    info "tcp_wmem 将设为：${wmem[0]} ${wmem[1]} $maximum。"
+    printf '\n'
+    detail '所选上限' "$mib MiB（$maximum 字节）"
+    detail '新 tcp_rmem' "${rmem[0]} ${rmem[1]} $maximum"
+    detail '新 tcp_wmem' "${wmem[0]} ${wmem[1]} $maximum"
     confirm '保存并立即应用' || { info '已取消设置 TCP 缓冲区。'; return 0; }
     apply_sysctl "net.ipv4.tcp_rmem=${rmem[0]} ${rmem[1]} $maximum" "net.ipv4.tcp_wmem=${wmem[0]} ${wmem[1]} $maximum"
 }
@@ -662,20 +741,20 @@ update_script() {
     require curl bash readlink mktemp cmp cp chmod chown mv || return 1
     target=$(readlink -f -- "$SCRIPT_SOURCE") || return 1
     [[ -f $target && -w $target ]] || {
-        error '未找到可更新的本地脚本，请先下载为 vps_setup.sh，再使用 bash vps_setup.sh 运行。'
+        error '未找到可更新的本地脚本，请先下载为 vps.sh，再使用 sudo bash vps.sh 运行。'
         return 1
     }
     section '更新 VPS 管理脚本'
     detail '更新地址' "$SCRIPT_UPDATE_URL"
     detail '本地脚本' "$target"
-    info '更新前备份当前脚本；更新成功后退出菜单，重新运行即可使用新版。'
+    menu_hint '更新前会自动备份当前脚本；更新成功后退出菜单，重新运行即可使用新版。'
     confirm '下载并更新脚本' || { info '已取消更新。'; return 0; }
     download_script_update "$target" || status=$?
     case $status in
         0)
             SCRIPT_UPDATED=1
             info '脚本已更新。请重新运行：'
-            printf '  bash %q\n' "$target" ;;
+            printf '  sudo bash %q\n' "$target" ;;
         2) info '本地脚本与远端一致，无需更新。' ;;
         *) return "$status" ;;
     esac
@@ -683,6 +762,7 @@ update_script() {
 
 show_status() {
     local settings key value status=0
+    local -a parts=()
     section 'SSH 登录配置'
     if command -v sshd >/dev/null && [[ -f $SSH_CONFIG ]]; then
         menu_hint '以下为全局生效配置，具体用户还可能受 Match 影响。'
@@ -711,19 +791,21 @@ show_status() {
     for key in net.core.default_qdisc net.ipv4.tcp_available_congestion_control \
         net.ipv4.tcp_congestion_control net.ipv4.tcp_rmem net.ipv4.tcp_wmem; do
         if value=$(sysctl -n "$key"); then
+            read -r -a parts <<< "$value"
+            value="${parts[*]}"
             case $key in
                 net.core.default_qdisc) detail '队列调度算法' "$value" ;;
-                net.ipv4.tcp_available_congestion_control) detail '可用拥塞控制算法' "$value" ;;
-                net.ipv4.tcp_congestion_control) detail '当前拥塞控制算法' "$value" ;;
-                net.ipv4.tcp_rmem) detail 'TCP 接收缓冲区（字节）' "$value" ;;
-                net.ipv4.tcp_wmem) detail 'TCP 发送缓冲区（字节）' "$value" ;;
+                net.ipv4.tcp_available_congestion_control) detail '可用拥塞控制' "$value" ;;
+                net.ipv4.tcp_congestion_control) detail '当前拥塞控制' "$value" ;;
+                net.ipv4.tcp_rmem) detail 'TCP 接收缓冲区' "$value" ;;
+                net.ipv4.tcp_wmem) detail 'TCP 发送缓冲区' "$value" ;;
             esac
         else
             warn "无法读取 $key，当前内核可能不支持此参数。"
             status=1
         fi
     done
-    menu_hint '缓冲区三个值依次为：最小值、初始值、上限。'
+    menu_hint '缓冲区单位为字节，三个值依次为：最小值、默认值、上限。'
     return "$status"
 }
 
@@ -736,35 +818,30 @@ run_action() {
 }
 
 show_menu() {
-    printf '\n'
-    styled_text '1;32' '  VPS 管理 · SSH / BBR / TCP'
-    printf '\n'
-    menu_hint '输入选项编号后按 Enter；0 或 q 退出。'
+    banner 'VPS 管理工具 · SSH / BBR / TCP'
 
-    section 'SSH 登录与端口'
-    menu_item 1 '粘贴公钥并配置 root 密钥登录'
-    menu_item 2 '生成密钥对并配置 root 密钥登录'
+    section 'SSH 安全与端口'
+    menu_item 1 '粘贴公钥并配置 root 密钥登录（禁用密码）'
+    menu_item 2 '生成密钥对并配置 root 密钥登录（禁用密码）'
     menu_item 3 '修改 SSH 端口'
-    menu_hint '选项 1 / 2 会禁用密码登录。'
 
-    section '网络优化'
+    section '网络与 BBR 优化'
     menu_item 4 '开启 BBR + fq'
-    menu_item 5 '恢复 TCP 缓冲区基准值'
+    menu_item 5 '恢复 TCP 缓冲区默认基准'
     menu_item 6 '按延迟和带宽计算 TCP 缓冲区'
-    menu_item 7 '直接设置 TCP 缓冲区最大值（MiB）'
+    menu_item 7 '直接设置 TCP 缓冲区上限（MiB）'
 
-    section '状态查看'
-    menu_item 8 '查看 SSH / 内核 / 网络状态'
-
-    section 'SSH 备份与恢复'
+    section '状态、备份与维护'
+    menu_item 8 '查看当前状态（SSH / 内核 / 网络）'
     menu_item 9 '备份 SSH 配置和公钥'
     menu_item 10 '恢复 SSH 备份'
-
-    section '脚本更新与退出'
     menu_item 11 '更新脚本（GitHub 最新版）'
+
+    printf '\n'
     menu_item 0 '退出'
     printf '\n'
-    menu_hint '绿色：提示与关键值  黄色：注意事项  红色：错误'
+    rule
+    menu_hint '输入编号并按 Enter 执行，输入 0 退出。'
     printf '\n'
 }
 
@@ -772,7 +849,7 @@ main_menu() {
     local choice
     while true; do
         show_menu
-        ask choice '请选择 [0-11 / q]：' || return 0
+        ask choice '请选择 [0-11]：' || return 0
         # 允许粘贴编号时带有首尾空格，不影响公钥、路径等其它输入。
         choice=${choice#"${choice%%[![:space:]]*}"}
         choice=${choice%"${choice##*[![:space:]]}"}
@@ -793,11 +870,13 @@ main_menu() {
                 run_action update_script || true
                 (( SCRIPT_UPDATED == 0 )) || return 0 ;;
             0|q|Q) info '已退出 VPS 管理。'; return 0 ;;
-            *) warn '无效选项，请输入 0-11，或输入 q 退出。'; continue ;;
+            *) warn '无效选项，请输入 0-11。'; continue ;;
         esac
         printf '\n'
-        ask choice '按 Enter 返回主菜单，或输入 q 退出：' || return 0
-        if [[ $choice == [qQ] || $choice == 0 ]]; then
+        ask choice '按 Enter 返回主菜单，输入 0 退出：' || return 0
+        choice=${choice#"${choice%%[![:space:]]*}"}
+        choice=${choice%"${choice##*[![:space:]]}"}
+        if [[ $choice == 0 || $choice == [qQ] ]]; then
             info '已退出 VPS 管理。'
             return 0
         fi
@@ -807,28 +886,30 @@ main_menu() {
 main() {
     case ${1:---menu} in
         -h|--help)
-            section 'VPS SSH / BBR / TCP 管理工具'
-            info '用法：sudo bash vps_setup.sh [选项]'
+            banner 'VPS 管理工具 · SSH / BBR / TCP'
+            printf '\n'
+            info '用法：sudo bash vps.sh [选项]'
+
             section '运行选项'
-            cat <<'HELP'
-  --menu          交互式菜单（默认）
-  --quick         粘贴公钥，配置 root 密钥登录并禁用密码登录
-  --bbr           启用并持久化 BBR + fq（不安装或更换内核）
-  --tcp-defaults  恢复指定的 TCP 缓冲区基准并持久化
-  --help, -h      显示帮助
-HELP
+            help_item '--menu' '交互式菜单（默认）'
+            help_item '--quick' '粘贴公钥，配置 root 密钥登录并禁用密码登录'
+            help_item '--bbr' '启用并持久化 BBR + fq（不安装或更换内核）'
+            help_item '--tcp-defaults' '恢复默认 TCP 缓冲区基准并持久化'
+            help_item '--help, -h' '显示帮助'
+
             section '配置与备份'
-            detail 'SSH 配置' '优先使用 sshd_config.d/00-vps-setup.conf'
-            detail 'SSH 端口' '独立使用 sshd_config.d/00-vps-setup-port.conf'
+            detail 'SSH 配置' '优先使用 /etc/ssh/sshd_config.d/00-vps-setup.conf'
+            detail 'SSH 端口' '独立使用 /etc/ssh/sshd_config.d/00-vps-setup-port.conf'
             detail '网络参数' "$SYSCTL_CONFIG"
             detail '备份位置' "$BACKUP_ROOT/"
-            info 'SSH 配置修改失败自动回滚。'
+
             section '交互说明'
-            menu_hint '输入编号选择功能；0 或 q 退出；操作后按 Enter 返回菜单。'
-            menu_hint '选项 7 直接输入 TCP 上限（MiB）；选项 11 从 GitHub 更新本地脚本。'
-            menu_hint '确认操作默认选 N（取消），输入 y / yes 确认。'
-            menu_hint '颜色：绿色提示与关键值，黄色注意事项，红色错误。'
-            menu_hint '设置 NO_COLOR=1 可关闭颜色；重定向输出时自动使用纯文本。'
+            detail '菜单选择' '输入编号并按 Enter 执行，输入 0 退出'
+            detail '快速选项' '选项 7 直接输入上限（MiB）；选项 11 从 GitHub 更新脚本'
+            detail '操作确认' '默认取消 [y/N]，输入 y 或 yes 确认'
+            detail '失败回滚' 'SSH 或网络参数修改失败时自动回滚'
+            detail '颜色控制' '设置 NO_COLOR=1 可关闭颜色；非终端输出自动纯文本'
+            printf '\n'
             return 0 ;;
         --menu|--quick|--bbr|--tcp-defaults) ;;
         *) error "未知选项：$1"; return 1 ;;
@@ -849,7 +930,7 @@ HELP
         *)
             if [[ -t 0 ]]; then exec 3<&0
             elif ! { exec 3</dev/tty; } 2>/dev/null; then
-                error '交互模式需要终端；请下载脚本后使用 sudo bash vps_setup.sh 运行。'; return 1
+                error '交互模式需要终端；请下载脚本后使用 sudo bash vps.sh 运行。'; return 1
             fi
             if [[ ${1:---menu} == --quick ]]; then run_action configure_keys paste; else main_menu; fi ;;
     esac
