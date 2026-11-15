@@ -2,6 +2,19 @@
  <img src="https://raw.githubusercontent.com/tom2almighty/files/main/assets/surge.png" width="200">
 </div>
 
+## 一键脚本
+
+- **VPS 管理** ([vps.sh](script/vps.sh))
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tom2almighty/files/main/script/vps.sh -o vps.sh && sudo bash vps.sh
+```
+
+- **Mihomo 部署** ([mihomo.sh](script/mihomo.sh))
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/tom2almighty/files/main/script/mihomo.sh -o mihomo.sh && sudo bash mihomo.sh
+```
 
 ## 免责申明
 
