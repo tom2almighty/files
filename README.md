@@ -16,6 +16,16 @@ curl -fsSL https://raw.githubusercontent.com/tom2almighty/files/main/script/vps.
 curl -fsSL https://raw.githubusercontent.com/tom2almighty/files/main/script/mihomo.sh -o mihomo.sh && sudo bash mihomo.sh
 ```
 
+## 油猴脚本
+
+- **NodeSeek Plus** ([nodeseek.js](script/nodeseek.js)) — NodeSeek / DeepFlood 论坛增强脚本
+  - 快速导入：[一键安装脚本](https://raw.githubusercontent.com/tom2almighty/files/main/script/nodeseek.js?.user.js)（适用于 Tampermonkey / Violentmonkey / ScriptCat）
+  - 如浏览器未弹出安装页，可在油猴扩展「从 URL 安装」或 Safari Userscripts 中导入：
+
+```text
+https://raw.githubusercontent.com/tom2almighty/files/main/script/nodeseek.js
+```
+
 ## 免责申明
 
 > [!IMPORTANT]
