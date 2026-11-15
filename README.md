@@ -1,7 +1,3 @@
-<div align="center">
- <img src="https://raw.githubusercontent.com/tom2almighty/files/main/assets/surge.png" width="200">
-</div>
-
 ## 一键脚本
 
 - **VPS 管理** ([vps.sh](script/vps.sh))
@@ -28,12 +24,12 @@ https://raw.githubusercontent.com/tom2almighty/files/main/script/nodeseek.js
 
 ## 免责申明
 
-> [!IMPORTANT]
-> 任何以任何方式查看此项目的人或直接或间接使用该项目的使用者都应仔细阅读此声明。
->
-> 保留随时更改或补充此免责声明的权利。
->
-> 一旦使用并复制了该项目的任何文件，则视为您已接受此免责声明.
+
+- 任何以任何方式查看此项目的人或直接或间接使用该项目的使用者都应仔细阅读此声明。
+
+- 保留随时更改或补充此免责声明的权利。
+
+- 一旦使用并复制了该项目的任何文件，则视为您已接受此免责声明.
 
 - 本项目涉及的脚本仅用于资源共享和学习研究，不能保证其合法性，准确性，完整性和有效性，请根据情况自行判断.
 
