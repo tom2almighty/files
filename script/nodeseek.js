@@ -3,7 +3,9 @@
 // @author       tom2almighty
 // @description  NodeSeek / DeepFlood 论坛增强脚本：楼中楼树形讨论、头像面板拉黑、快捷回复、图床上传、下拉加载与关键字过滤。
 // @namespace    nodeseek-plus
-// @version      2.0.0
+// @version      2.0.1
+// @updateURL    https://raw.githubusercontent.com/tom2almighty/files/main/script/nodeseek.js
+// @downloadURL  https://raw.githubusercontent.com/tom2almighty/files/main/script/nodeseek.js
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=nodeseek.com
 // @match        *://www.nodeseek.com/*
 // @match        *://www.deepflood.com/*
