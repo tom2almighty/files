@@ -393,22 +393,89 @@
             runFilter($$(".post-list-item"));
             ctx.watch(".post-list-item", els => runFilter(els), { debounce: 150 });
 
-            const panelCss = `.nsx-rel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 6px}.nsx-rel-title{font-size:15px;font-weight:600}.nsx-rel-action{border:0;background:0;color:#666;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px}.nsx-rel-action:hover{background:#f2f3f5}.nsx-rel-search{display:flex;align-items:center;gap:6px;margin:0 12px 8px;border:1px solid #e1e1e1;border-radius:8px;padding:6px 8px;color:#888}.nsx-rel-search input{border:0;background:0;outline:0;width:100%;font-size:13px;color:inherit}.nsx-rel-tabs{display:flex;align-items:center;gap:16px;padding:0 12px 6px;border-bottom:1px solid #f0f0f0}.nsx-rel-tab{border:0;background:0;cursor:pointer;color:#6b6b6b;font-size:12px;padding:6px 0;font-weight:600;border-bottom:2px solid transparent;display:inline-flex;align-items:center;gap:5px}.nsx-rel-tab.is-active{color:#0a62ff;border-bottom-color:#0a62ff}.nsx-kw-default-color{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#6b6b6b;cursor:pointer;user-select:none}.nsx-kw-default-color input[type="color"]{width:22px;height:22px;padding:0;border:1px solid #d4d4d8;border-radius:5px;background:transparent;cursor:pointer}.nsx-rel-list{flex:1;overflow-y:auto;padding:6px 8px 12px}.nsx-rel-item{display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:8px}.nsx-rel-item:hover{background:#f5f7fb}.nsx-rel-link{display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-decoration:none;color:inherit}.nsx-rel-icon{width:36px;height:36px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;color:#999;font-weight:bold;font-size:18px}.nsx-rel-info{display:flex;flex-direction:column;gap:2px;overflow:hidden;flex:1}.nsx-rel-item-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;font-size:14px}.nsx-rel-remark{color:#888;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nsx-rel-time{color:#aaa;font-size:11px}.nsx-rel-empty{padding:20px 6px;color:#999;font-size:13px;text-align:center}.nsx-rel-close{border:0;background:0;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;color:#999;display:none}.nsx-rel-item:hover .nsx-rel-close{display:block}.nsx-rel-close:hover{color:#f44336;background:#fee}.dark-layout .nsx-rel-action{color:#999}.dark-layout .nsx-rel-action:hover{background:#2a2a2a}.dark-layout .nsx-rel-search{border-color:#3a3a3a;color:#9aa4b2}.dark-layout .nsx-rel-search input{color:#e0e0e0}.dark-layout .nsx-rel-tabs{border-bottom-color:#3a3a3a}.dark-layout .nsx-rel-tab,.dark-layout .nsx-kw-default-color{color:#999}.dark-layout .nsx-kw-default-color input[type="color"]{border-color:#52525b}.dark-layout .nsx-rel-item:hover{background:#2a2a2a}.dark-layout .nsx-rel-icon{background:#3a3a3a}`;
+            const panelCss = `.nsx-rel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 12px 6px}.nsx-rel-title{font-size:15px;font-weight:600}.nsx-rel-action{border:0;background:0;color:#666;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px}.nsx-rel-action:hover{background:#f2f3f5}.nsx-rel-search{display:flex;align-items:center;margin:0 12px 8px;border:1px solid #e1e1e1;border-radius:8px;padding:6px 10px;color:#888}.nsx-rel-search input{border:0;background:0;outline:0;width:100%;font-size:13px;color:inherit}.nsx-rel-tabs{display:flex;align-items:center;gap:16px;padding:0 12px 6px;border-bottom:1px solid #f0f0f0}.nsx-rel-tab{border:0;background:0;cursor:pointer;color:#6b6b6b;font-size:12px;padding:6px 0;font-weight:600;border-bottom:2px solid transparent;display:inline-flex;align-items:center}.nsx-rel-tab.is-active{color:#0a62ff;border-bottom-color:#0a62ff}.nsx-kw-default-color{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#6b6b6b;cursor:pointer;user-select:none}.nsx-kw-default-color input[type="color"]{width:22px;height:22px;padding:0;border:1px solid #d4d4d8;border-radius:5px;background:transparent;cursor:pointer}.nsx-rel-list{flex:1;overflow-y:auto;padding:6px 8px 12px}.nsx-rel-item{display:flex;align-items:center;gap:8px;padding:8px 6px;border-radius:8px}.nsx-rel-item:hover{background:#f5f7fb}.nsx-rel-link{display:flex;align-items:center;gap:10px;flex:1;min-width:0;text-decoration:none;color:inherit}.nsx-rel-icon{width:36px;height:36px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;color:#999;font-weight:bold;font-size:18px}.nsx-rel-info{display:flex;flex-direction:column;gap:2px;overflow:hidden;flex:1}.nsx-rel-item-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:bold;font-size:14px}.nsx-rel-remark{color:#888;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nsx-rel-time{color:#aaa;font-size:11px}.nsx-rel-empty{padding:20px 6px;color:#999;font-size:13px;text-align:center}.nsx-rel-close{border:0;background:0;cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;color:#999;display:none}.nsx-rel-item:hover .nsx-rel-close{display:block}.nsx-rel-close:hover{color:#f44336;background:#fee}.nsx-kw-nav-btn{cursor:pointer;white-space:nowrap;font-size:inherit;text-decoration:none}.nsx-kw-nav-btn.is-open{color:#0a62ff!important}.dark-layout .nsx-rel-action{color:#999}.dark-layout .nsx-rel-action:hover{background:#2a2a2a}.dark-layout .nsx-rel-search{border-color:#3a3a3a;color:#9aa4b2}.dark-layout .nsx-rel-search input{color:#e0e0e0}.dark-layout .nsx-rel-tabs{border-bottom-color:#3a3a3a}.dark-layout .nsx-rel-tab,.dark-layout .nsx-kw-default-color{color:#999}.dark-layout .nsx-kw-default-color input[type="color"]{border-color:#52525b}.dark-layout .nsx-rel-item:hover{background:#2a2a2a}.dark-layout .nsx-rel-icon{background:#3a3a3a}`;
             addStyle("nsx-filter-panel-style", panelCss);
 
             // --- 独立的关键字面板逻辑 ---
             let kwPanel = null, kwTrigger = null, pState = { open: false, kw: "", tab: "block" };
             const head = ctx.$("#nsk-head");
             if (head) {
-                const grp = ensureIconGroup();
-                if (!grp) return;
-                kwTrigger = document.createElement("div");
-                kwTrigger.className = "filter-dropdown-on";
-                kwTrigger.innerHTML = `<svg viewBox="0 0 48 48" fill="none" style="width:17px;height:17px;color:currentColor;"><path d="M6 9L20.4 25.8178V38.4444L27.6 42V25.8178L42 9H6Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"/></svg>`;
-                kwTrigger.title = "关键字过滤管理";
-                grp.appendChild(kwTrigger);
+                const KW_TRIGGER_ID = "nsx-kw-nav";
+                const ensureKwTrigger = () => {
+                    let trigger = document.getElementById(KW_TRIGGER_ID);
+                    if (!trigger) {
+                        trigger = document.createElement("a");
+                        trigger.id = KW_TRIGGER_ID;
+                        trigger.href = "javascript:void(0)";
+                        trigger.setAttribute("role", "button");
+                        trigger.textContent = "关键字过滤";
+                        trigger.title = "关键字过滤管理";
+                    }
+                    kwTrigger = trigger;
 
-                const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+                    const headerLinks = [...document.querySelectorAll("header a")];
+                    const anchorLink = document.getElementById("nsx-email-nav")
+                        || headerLinks.find(a => { const t = a.textContent.trim(); return t === "DeepFlood" || t === "DF"; });
+
+                    if (anchorLink) {
+                        trigger.className = `${anchorLink.className ? anchorLink.className + " " : ""}nsx-kw-nav-btn`;
+                        trigger.style.marginLeft = "16px";
+                        if (anchorLink.parentElement?.tagName === "LI" && anchorLink.parentElement.parentElement) {
+                            let li = document.getElementById("nsx-kw-nav-item");
+                            if (!li) {
+                                li = document.createElement("li");
+                                li.id = "nsx-kw-nav-item";
+                                li.className = anchorLink.parentElement.className;
+                            }
+                            if (trigger.parentElement !== li) li.appendChild(trigger);
+                            trigger.style.marginLeft = "";
+                            if (li.previousElementSibling !== anchorLink.parentElement) anchorLink.parentElement.after(li);
+                        } else if (trigger.previousElementSibling !== anchorLink) {
+                            anchorLink.after(trigger);
+                        }
+                        return trigger;
+                    }
+
+                    const navLinks = document.querySelector("header .nav-links, header nav, #nsk-head .header-nav, #nsk-head .nav-menu");
+                    if (navLinks) {
+                        if (navLinks.tagName === "UL") {
+                            const lastLi = [...navLinks.querySelectorAll(":scope > li:not(#nsx-kw-nav-item)")].pop();
+                            let li = document.getElementById("nsx-kw-nav-item");
+                            if (!li) {
+                                li = document.createElement("li");
+                                li.id = "nsx-kw-nav-item";
+                                if (lastLi?.className) li.className = lastLi.className;
+                            }
+                            const refA = lastLi?.querySelector("a");
+                            trigger.className = `${refA?.className ? refA.className + " " : ""}nsx-kw-nav-btn`;
+                            trigger.style.marginLeft = "";
+                            if (trigger.parentElement !== li) li.appendChild(trigger);
+                            if (li.parentElement !== navLinks) navLinks.appendChild(li);
+                        } else {
+                            const lastLink = [...navLinks.querySelectorAll("a")].filter(a => a.id !== KW_TRIGGER_ID).pop();
+                            trigger.className = `${lastLink?.className ? lastLink.className + " " : ""}nsx-kw-nav-btn`;
+                            if (lastLink) {
+                                trigger.style.marginLeft = "16px";
+                                if (trigger.previousElementSibling !== lastLink) lastLink.after(trigger);
+                            } else if (trigger.parentElement !== navLinks) {
+                                navLinks.appendChild(trigger);
+                            }
+                        }
+                        return trigger;
+                    }
+
+                    const grp = ensureIconGroup();
+                    if (!grp) return null;
+                    trigger.className = "filter-dropdown-on nsx-kw-nav-btn";
+                    trigger.style.marginLeft = "";
+                    trigger.style.fontSize = "13px";
+                    if (trigger.parentElement !== grp) grp.appendChild(trigger);
+                    return trigger;
+                };
+
+                if (!ensureKwTrigger()) return;
+
+                const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
                 const renderList = () => {
                     const map = getMap();
@@ -444,11 +511,11 @@
                     if (!kwPanel) {
                         kwPanel = document.createElement("div"); kwPanel.id = "nsx-filter-panel";
                         kwPanel.innerHTML = `
-                                <div class="nsx-rel-header"><div class="nsx-rel-title">关键字过滤</div><div style="display:flex;gap:8px;"><button class="nsx-rel-action" data-a="add">${svgIcon("nsx-plus", 12)} 新增</button><button class="nsx-rel-action" data-a="clear">清空当前组</button></div></div>
-                                <div class="nsx-rel-search">${svgIcon("nsx-search", 13)}<input placeholder="搜索关键字与配置..."/></div>
+                                <div class="nsx-rel-header"><div class="nsx-rel-title">关键字过滤</div><div style="display:flex;gap:8px;"><button class="nsx-rel-action" data-a="add">新增</button><button class="nsx-rel-action" data-a="clear">清空当前组</button></div></div>
+                                <div class="nsx-rel-search"><input placeholder="搜索关键字与配置..."/></div>
                                 <div class="nsx-rel-tabs">
-                                    <button class="nsx-rel-tab is-active" data-t="block">${svgIcon("nsx-ban", 12)} 屏蔽</button>
-                                    <button class="nsx-rel-tab" data-t="highlight">${svgIcon("nsx-palette", 12)} 高亮</button>
+                                    <button class="nsx-rel-tab is-active" data-t="block">屏蔽</button>
+                                    <button class="nsx-rel-tab" data-t="highlight">高亮</button>
                                     <label class="nsx-kw-default-color" title="设置默认高亮色"><span>默认色</span><input type="color" id="nsx-kw-default-color" value="${esc(toHexColor(getDefaultHighlightColor()))}"></label>
                                 </div>
                                 <div class="nsx-rel-list"></div>
@@ -601,17 +668,33 @@
                         document.addEventListener("keydown", e => { if (pState.open && e.key === "Escape") closePanel(); });
                     }
                     const r = kwTrigger.getBoundingClientRect();
-                    kwPanel.style.top = `${r.bottom + 8}px`;
-                    kwPanel.style.height = `${innerHeight - r.bottom - 16}px`;
-                    kwPanel.style.right = ``;
+                    const top = Math.max(12, r.bottom + 8);
+                    const panelW = Math.min(380, innerWidth * 0.94);
+                    const left = Math.max(12, Math.min(r.left, innerWidth - panelW - 12));
+                    kwPanel.style.top = `${top}px`;
+                    kwPanel.style.left = `${left}px`;
+                    kwPanel.style.right = `auto`;
+                    kwPanel.style.height = `${Math.max(260, innerHeight - top - 16)}px`;
                     renderList(); kwPanel.classList.add("show"); pState.open = true;
+                    kwTrigger.classList.add("is-open");
                 };
-                const closePanel = () => { kwPanel?.classList.remove("show"); pState.open = false; };
-                kwTrigger.onclick = e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    pState.open ? closePanel() : openPanel();
+                const closePanel = () => {
+                    kwPanel?.classList.remove("show");
+                    kwTrigger?.classList.remove("is-open");
+                    pState.open = false;
                 };
+                const bindTrigger = () => {
+                    const tr = ensureKwTrigger();
+                    if (!tr) return;
+                    tr.onclick = e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        pState.open ? closePanel() : openPanel();
+                    };
+                };
+                bindTrigger();
+                const header = document.querySelector("header");
+                if (header) new MutationObserver(debounce(bindTrigger, 120)).observe(header, { childList: true, subtree: true });
             }
         }
     };
@@ -1443,47 +1526,6 @@
 
 
     /* ==========================================================================
-       [ 视觉美化 ] - 评论区楼主标识
-       ========================================================================== */
-    const visualPolish = {
-        id: "visualPolish",
-        order: 90,
-        match: ctx => ctx.isPost,
-        init(ctx) {
-            addStyle("nsx-visual-polish-op", `
-                .nsx-op-badge{display:inline-flex;align-items:center;padding:1px 6px;margin-left:5px;border-radius:4px;font-size:10px;font-weight:600;line-height:1.5;color:#1d4ed8;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.28);vertical-align:middle}
-                .dark-layout .nsx-op-badge{color:#93c5fd;background:rgba(96,165,250,.15);border-color:rgba(96,165,250,.32)}
-            `);
-            const getOpIdentity = () => {
-                const postAuthor = $(".nsk-post .nsk-content-meta-info .author-info a[href*='/space/']") || $(".nsk-post .author-info a[href*='/space/']");
-                const opCfg = ctx.uw?.__config__?.postData?.op;
-                const uid = postAuthor?.href?.match(/\/space\/(\d+)/)?.[1] || (opCfg?.uid != null ? String(opCfg.uid) : opCfg?.member_id != null ? String(opCfg.member_id) : "");
-                const name = (postAuthor?.textContent || opCfg?.name || opCfg?.member_name || "").trim();
-                return { uid, name };
-            };
-            const markOp = () => {
-                const op = getOpIdentity();
-                if (!op.uid && !op.name) return;
-                ctx.$$("ul.comments .nsk-content-meta-info .author-info a[href*='/space/']").forEach(a => {
-                    if (a.dataset.nsxOpChecked) return;
-                    a.dataset.nsxOpChecked = "1";
-                    const uid = a.href?.match(/\/space\/(\d+)/)?.[1] || "";
-                    const name = a.textContent.trim();
-                    const isOp = (op.uid && uid === op.uid) || (!op.uid && op.name && name.toLowerCase() === op.name.toLowerCase());
-                    if (!isOp) return;
-                    if (a.parentElement?.querySelector(".nsx-op-badge")) return;
-                    const badge = document.createElement("span");
-                    badge.className = "nsx-op-badge";
-                    badge.textContent = "楼主";
-                    a.after(badge);
-                });
-            };
-            markOp();
-            ctx.watch("ul.comments .nsk-content-meta-info", markOp, { debounce: 120 });
-        }
-    };
-
-    /* ==========================================================================
        [ 辅助工具 ] - 楼中楼嵌套讨论串
        ========================================================================== */
     const nestedComments = {
@@ -1538,14 +1580,14 @@
                 .nsx-thread-children li.content-item>.nsk-content-meta-info .avatar-wrapper{display:flex;align-items:center;flex-shrink:0;margin:0!important}
                 .nsx-thread-children li.content-item>.nsk-content-meta-info .avatar-wrapper img.avatar-normal{width:20px!important;height:20px!important;border-radius:5px!important;object-fit:cover}
                 .nsx-thread-children li.content-item>.nsk-content-meta-info>div:not(.avatar-wrapper):not(.floor-link-wrapper){display:flex;align-items:center;min-width:0;flex:1 1 auto}
-                .nsx-thread-children li.content-item>.nsk-content-meta-info .author-info{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:0!important;font-size:inherit;line-height:inherit}
+                .nsx-thread-children li.content-item>.nsk-content-meta-info .author-info{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin:0!important}
                 .nsx-thread-children li.content-item>.nsk-content-meta-info .content-info{display:none!important}
                 .nsx-thread-children li.content-item>.nsk-content-meta-info .floor-link-wrapper{position:static!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;display:inline-flex!important;align-items:center;gap:4px;margin-left:auto!important;flex-shrink:0;opacity:.72}
                 .nsx-reply-menu-toggle{display:inline-flex;align-items:center;gap:2px;margin:0;padding:1px 6px;border:1px solid var(--nsx-card-bd);border-radius:4px;background:transparent;color:#71717a;font-size:11px;line-height:1.35;cursor:pointer;flex-shrink:0;transition:color .15s ease,border-color .15s ease,background-color .15s ease}
                 .nsx-reply-menu-toggle:hover,.nsx-reply-menu-toggle.is-open{color:#2563eb;border-color:rgba(37,99,235,.4);background:rgba(37,99,235,.08)}
                 .dark-layout .nsx-reply-menu-toggle,html.dark .nsx-reply-menu-toggle{color:#a1a1aa}
                 .dark-layout .nsx-reply-menu-toggle:hover,.dark-layout .nsx-reply-menu-toggle.is-open,html.dark .nsx-reply-menu-toggle:hover,html.dark .nsx-reply-menu-toggle.is-open{color:#60a5fa;border-color:rgba(96,165,250,.45);background:rgba(96,165,250,.12)}
-                .nsx-thread-children li.content-item>.post-content{position:relative;font-size:inherit;line-height:inherit;margin:0!important;padding-left:26px!important;overflow-wrap:anywhere}
+                .nsx-thread-children li.content-item>.post-content{position:relative;font-size:var(--nsx-comment-fs,14px);margin:0!important;padding-left:26px!important;overflow-wrap:anywhere}
                 .nsx-thread-children li.content-item>.post-content>p:first-child{margin-top:0}
                 .nsx-thread-children li.content-item>.post-content>p:last-child{margin-bottom:0}
                 .nsx-thread-children li.content-item>.post-content img{max-width:100%;max-height:220px;width:auto;height:auto;border-radius:6px}
@@ -2018,6 +2060,11 @@
                         mountBranch(root, 0);
                     });
                     listEl.appendChild(frag);
+                    const sampleRoot = roots.find(r => r.contentEl)?.contentEl;
+                    if (sampleRoot) {
+                        const fs = getComputedStyle(sampleRoot).fontSize;
+                        if (fs) listEl.style.setProperty("--nsx-comment-fs", fs);
+                    }
                     ensureToolbar(listEl, collectStats(listEl));
                 } finally {
                     listObserver?.takeRecords();
@@ -2053,12 +2100,8 @@
 <symbol id="at-sign" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"><path d="M24 44c11.046 0 20-8.954 20-20S35.046 4 24 4 4 12.954 4 24s8.954 20 20 20"/><path d="M32 24c0 4.418-3.582 10-8 10s-8-5.582-8-10 3.582-8 8-8 8 3.582 8 8m0 0v10c0 3 3 6 6 6"/></g></symbol>
 <symbol id="envelope-one" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"><path d="M4 39h40V9H4z"/><path d="m4 9 20 15L44 9"/></g></symbol>
 <symbol id="remind-6nce9p47" viewBox="0 0 48 48"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"><path d="M24 44c1.387 0 2.732-.123 4.023-.357M44 24a20 20 0 0 0-40 0c0 4.59 1.55 8.82 4.157 12.194L4 44l7.806-4.157A19.9 19.9 0 0 0 24 44a20 20 0 0 0 4.023-.357"/><path d="M33.805 40a6 6 0 1 0 5.857-9.805"/></g></symbol>
-<symbol id="nsx-palette" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8Z"/><circle cx="13.5" cy="6.5" r=".8" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".8" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".8" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".8" fill="currentColor"/></symbol>
-<symbol id="nsx-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" d="m20 20-3.5-3.5"/></symbol>
 <symbol id="nsx-plus" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M12 5v14M5 12h14"/></symbol>
 <symbol id="nsx-close" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="2" d="M18 6 6 18M6 6l12 12"/></symbol>
-<symbol id="nsx-external" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M14 4h6v6m0-6L10 14m8-2v7a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h7"/></symbol>
-<symbol id="nsx-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="1.8" d="m5.6 5.6 12.8 12.8"/></symbol>
 <symbol id="nsx-bolt" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></symbol>
 <symbol id="nsx-quote" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10 11H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3a1 1 0 0 1 1 1v6c0 2.5-1.5 4.5-4 5m14-6h-4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h3a1 1 0 0 1 1 1v6c0 2.5-1.5 4.5-4 5"/></symbol>
 <symbol id="nsx-tree" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M5 4v14h5m-5-7h5"/><rect width="8" height="4" x="10" y="9" fill="none" stroke="currentColor" stroke-width="1.8" rx="1"/><rect width="8" height="4" x="10" y="16" fill="none" stroke="currentColor" stroke-width="1.8" rx="1"/><rect width="10" height="4" x="3" y="2" fill="none" stroke="currentColor" stroke-width="1.8" rx="1"/></symbol>
@@ -2475,193 +2518,6 @@
             }
         };
 
-        const postPreview = {
-            id: 'postPreview', order: 386,
-            match: ctx => !ctx.isPost,
-            init(ctx) {
-                const rows = '.post-list-item, .post-list .list-item';
-                const states = new Map();
-                let nextId = 0;
-                addStyle('nsx-post-preview-style', `
-                    :root{--nsx-card-bg:rgba(125,140,160,.045);--nsx-card-bd:rgba(125,140,160,.16)}
-                    .dark-layout,html.dark{--nsx-card-bg:rgba(255,255,255,.028);--nsx-card-bd:rgba(255,255,255,.09)}
-                    .nsx-preview-row{position:relative!important;min-height:62px;box-sizing:border-box}
-                    .nsx-preview-row>.post-list-content,.nsx-preview-content{flex:1 1 0%!important;min-width:0!important;width:0;max-width:100%;box-sizing:border-box;align-self:stretch}
-                    .nsx-preview-heading{display:block!important;min-width:0;width:100%;box-sizing:border-box;padding-right:88px!important;min-height:26px}
-                    .nsx-preview-heading>a,.nsx-preview-heading>span{display:inline!important;float:none!important;flex:none!important;width:auto!important;margin-left:0!important}
-                    .nsx-preview-toggle{position:absolute;top:6px;right:16px;z-index:2;box-sizing:border-box;min-width:68px;height:23px;padding:0 9px;color:#fff;background:#111;border:1px solid #111;border-radius:5px;font:inherit;font-size:11px;font-weight:500;line-height:21px;cursor:pointer;white-space:nowrap;transition:background .15s ease,border-color .15s ease,color .15s ease}
-                    .nsx-preview-toggle:hover{color:#111;background:#fff;border-color:#111}
-                    .dark-layout .nsx-preview-toggle,html.dark .nsx-preview-toggle{background:#27272a;border-color:#3f3f46;color:#fafafa}
-                    .dark-layout .nsx-preview-toggle:hover,html.dark .nsx-preview-toggle:hover{background:#fafafa;color:#18181b;border-color:#fafafa}
-                    .nsx-preview-toggle:focus-visible{outline:2px solid #86868b;outline-offset:2px}
-                    .nsx-preview-panel{width:100%!important;align-self:stretch;margin:10px 0;padding:10px 12px;border-radius:10px;border:1px solid var(--nsx-card-bd);background:var(--nsx-card-bg);box-sizing:border-box;min-width:0;max-width:100%;font-size:13px;line-height:1.62}
-                    .nsx-preview-panel[hidden]{display:none!important}
-                    .nsx-preview-body{max-height:min(480px,60vh);overflow:auto;overscroll-behavior:auto;scrollbar-gutter:stable;overflow-wrap:anywhere;padding-right:4px}
-                    .nsx-preview-body img{max-width:100%;max-height:260px;width:auto;height:auto;border-radius:6px}
-                    .nsx-preview-body pre{white-space:pre-wrap;overflow-wrap:anywhere;padding:10px;background:rgba(125,140,160,.08);border-radius:6px}
-                    .nsx-preview-body table{display:block;max-width:100%;overflow:auto}
-                    .nsx-preview-body blockquote{margin:6px 0;padding:5px 10px;border-left:2px solid rgba(125,140,160,.4)}
-                    .nsx-preview-entry{padding:9px 11px;margin-bottom:6px;border-radius:9px;border:1px solid var(--nsx-card-bd);background:var(--nsx-card-bg)}
-                    .nsx-preview-entry:last-child{margin-bottom:0}
-                    .nsx-preview-entry>p:first-child{margin-top:0}
-                    .nsx-preview-entry>p:last-child{margin-bottom:0}
-                    .nsx-preview-author{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;margin-bottom:5px;color:var(--link-color,#4679aa)}
-                    .nsx-preview-nav{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid var(--nsx-card-bd)}
-                    .nsx-preview-nav button{border:1px solid var(--nsx-card-bd);border-radius:5px;background:transparent;color:inherit;font-size:12px;padding:3px 9px;cursor:pointer;transition:background-color .14s ease}
-                    .nsx-preview-nav button:hover:not(:disabled){background:rgba(125,140,160,.12)}
-                    .nsx-preview-nav button:disabled{opacity:.5;cursor:default}
-                    .nsx-preview-status{font-size:11.5px;color:#71717a;margin-bottom:6px;font-variant-numeric:tabular-nums}
-                    .dark-layout .nsx-preview-status,html.dark .nsx-preview-status{color:#a1a1aa}
-                    .nsx-preview-nav a{margin-left:auto;display:inline-flex;align-items:center;gap:4px;font-size:12px}
-                `);
-                const samePost = (value, id) => {
-                    try { const u = new URL(value, location.origin); return u.origin === location.origin && new RegExp(`^/post-${id}-[1-9]\\d*/?$`).test(u.pathname) ? u : null; } catch { return null; }
-                };
-                // Rebuild a passive HTML subset. Never insert fetched scripts, handlers, forms or frames.
-                const safeContent = (source, base) => {
-                    const allowed = new Set('P DIV SPAN BR HR STRONG B EM I U S DEL BLOCKQUOTE PRE CODE UL OL LI H1 H2 H3 H4 H5 H6 TABLE THEAD TBODY TR TH TD A IMG DETAILS SUMMARY'.split(' '));
-                    const blocked = new Set('SCRIPT STYLE IFRAME OBJECT EMBED FORM INPUT BUTTON TEXTAREA SELECT SVG MATH LINK META BASE'.split(' '));
-                    const clean = node => {
-                        if (node.nodeType === 3) return document.createTextNode(node.textContent);
-                        const fragment = document.createDocumentFragment();
-                        if (node.nodeType !== 1 || blocked.has(node.tagName)) return fragment;
-                        const target = allowed.has(node.tagName) ? document.createElement(node.tagName.toLowerCase()) : fragment;
-                        if (node.tagName === 'A' || node.tagName === 'IMG') {
-                            const attr = node.tagName === 'A' ? 'href' : 'src';
-                            const raw = node.getAttribute(attr);
-                            try {
-                                const url = raw && new URL(raw, base);
-                                if (url && ['https:', 'http:'].includes(url.protocol)) {
-                                    target.setAttribute(attr, url.href);
-                                    if (attr === 'href') { target.target = '_blank'; target.rel = 'noopener noreferrer'; }
-                                    else { target.loading = 'lazy'; target.referrerPolicy = 'no-referrer'; target.alt = node.getAttribute('alt') || ''; }
-                                }
-                            } catch {}
-                        }
-                        for (const child of node.childNodes) target.append(clean(child));
-                        return target;
-                    };
-                    return clean(source);
-                };
-                const setup = row => {
-                    if (states.has(row) || row.closest('.nsx-preview-panel')) return;
-                    const heading = row.querySelector('.post-title');
-                    const link = heading?.querySelector('a[href]');
-                    const match = link?.pathname?.match(/^\/post-(\d+)-\d+\/?$/);
-                    if (!match || link.origin !== location.origin) return;
-                    const id = match[1], first = `/post-${id}-1`;
-                    const toggle = document.createElement('button'); toggle.type = 'button'; toggle.className = 'nsx-preview-toggle'; toggle.textContent = '打开预览'; toggle.setAttribute('aria-expanded','false');
-                    const panel = document.createElement('section'); panel.className = 'nsx-preview-panel'; panel.id = `nsx-preview-${++nextId}`; panel.hidden = true; panel.setAttribute('aria-label','帖子正文与评论预览'); toggle.setAttribute('aria-controls',panel.id);
-                    const status = document.createElement('div'); status.className = 'nsx-preview-status'; status.setAttribute('role','status');
-                    const body = document.createElement('div'); body.className = 'nsx-preview-body'; body.tabIndex = 0;
-                    const nav = document.createElement('div'); nav.className = 'nsx-preview-nav'; panel.append(status,body,nav);
-                    row.classList.add('nsx-preview-row');
-                    const contentColumn = row.querySelector('.post-list-content') || heading.parentElement;
-                    if (contentColumn !== row) contentColumn.classList.add('nsx-preview-content');
-                    heading.classList.add('nsx-preview-heading'); row.append(toggle); heading.after(panel);
-                    // Use native chaining on touch, and forward excess wheel movement immediately.
-                    body.addEventListener('wheel', event => {
-                        if(event.ctrlKey || event.defaultPrevented || Math.abs(event.deltaX)>Math.abs(event.deltaY))return;
-                        const delta=event.deltaY*(event.deltaMode===1?16:event.deltaMode===2?body.clientHeight:1);
-                        const max=Math.max(0,body.scrollHeight-body.clientHeight);
-                        const next=Math.max(0,Math.min(max,body.scrollTop+delta));
-                        const remainder=delta-(next-body.scrollTop);
-                        if(Math.abs(remainder)>.5 && event.cancelable){
-                            event.preventDefault();body.scrollTop=next;
-                            window.scrollBy({top:remainder,left:0,behavior:'instant'});
-                        }
-                    },{passive:false});
-                    const state = { controller: null, generation: 0, loaded: false, url: first }; states.set(row,state);
-                    const load = async destination => {
-                        const url = samePost(destination,id); if (!url) return;
-                        state.controller?.abort(); const controller = new AbortController(); state.controller = controller;
-                        const generation = ++state.generation; const timer = setTimeout(()=>controller.abort(),15000);
-                        status.textContent = '正在加载正文和评论…'; panel.setAttribute('aria-busy','true');
-                        try {
-                            const response = await fetch(url.href,{credentials:'same-origin',signal:controller.signal});
-                            if (!response.ok || !samePost(response.url,id)) throw Error('无法读取帖子，请打开原帖检查登录或访问权限');
-                            const doc = new DOMParser().parseFromString(await response.text(),'text/html');
-                            let bootstrap = {};
-                            try {
-                                const encoded = doc.querySelector('#temp-script')?.textContent.trim();
-                                if (encoded) bootstrap = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(encoded), char => char.charCodeAt(0))));
-                            } catch {}
-                            const postData = bootstrap.postData || {};
-                            const commentData = Array.isArray(postData.comments) ? postData.comments : [];
-                            const main = doc.querySelector('.nsk-post .post-content, .post-detail-content, .post-content');
-                            const comments = [...doc.querySelectorAll('ul.comments > li, .comments > .content-item')];
-                            if (!main && !comments.length) throw Error('未找到正文或评论，请打开原帖查看');
-                            if (generation !== state.generation || panel.hidden || !row.isConnected) return;
-                            const fragment = document.createDocumentFragment();
-                            const appendEntry = (node,label,userId) => {
-                                const entry=document.createElement('article');entry.className='nsx-preview-entry';
-                                const title=document.createElement('div');title.className='nsx-preview-author';
-                                if (/^\d+$/.test(String(userId||''))) {
-                                    const avatar=document.createElement('img');avatar.src=`/avatar/${userId}.png`;avatar.alt='';avatar.style.cssText='width:20px;height:20px;border-radius:5px;object-fit:cover';
-                                    const authorLink=document.createElement('a');authorLink.href=`/space/${userId}`;authorLink.target='_blank';authorLink.rel='noopener noreferrer';authorLink.textContent=label;
-                                    title.append(avatar,authorLink);
-                                } else title.textContent=label;
-                                entry.append(title,safeContent(node,url.href));fragment.append(entry);
-                            };
-                            if (main && !main.closest('.comments')) appendEntry(main,'帖子正文',null);
-                            for (const [index,comment] of comments.entries()) {
-                                const content = comment.querySelector('.post-content, .comment-content, .content') || comment;
-                                const authorLink = [...comment.querySelectorAll('a[href*="/space/"]')].find(a=>a.textContent.trim());
-                                const record=commentData[index] || {};
-                                const person=record.author || record.user || record.member || record.op || {};
-                                const idFromDOM=comment.querySelector('a[href*="/space/"]')?.getAttribute('href')?.match(/\/space\/(\d+)/)?.[1];
-                                const uid=idFromDOM || person.uid || person.member_id || person.id || record.member_id || record.uid;
-                                const named=[authorLink?.textContent,comment.querySelector('.author-name, .username, .user-name')?.textContent,typeof person==='string'?person:null,person.name,person.username,person.member_name,record.username,record.member_name].find(v=>typeof v==='string'&&v.trim());
-                                const floor=comment.querySelector('.floor-link')?.textContent.trim();
-                                const label=(named?.trim() || (/^\d+$/.test(String(uid||''))?`用户 ${uid}`:'评论者信息未提供'))+(floor?' · '+floor:'');
-                                appendEntry(content,label,uid);
-                            }
-                            body.replaceChildren(fragment);body.scrollTop=0;nav.replaceChildren();
-                            const currentPage = Number(url.pathname.match(/-(\d+)\/?$/)[1]);
-                            const pages = new Map([[1,'1'],[currentPage,String(currentPage)]]);
-                            const addPage = value => {const n=Number(value);if(Number.isSafeInteger(n)&&n>0&&n<=100000)pages.set(n,String(n));};
-                            for (const anchor of doc.querySelectorAll('a[href]')) {
-                                const target=samePost(anchor.getAttribute('href'),id);
-                                if(target)addPage(target.pathname.match(/-(\d+)\/?$/)[1]);
-                            }
-                            for(const pager of doc.querySelectorAll('.nsk-pager,.pagination,.pager')) {
-                                for(const control of pager.querySelectorAll('a,button,[data-page]')) {
-                                    if(control.matches('.disabled,[disabled],[aria-disabled="true"]'))continue;
-                                    const number=control.getAttribute('data-page') || control.textContent.trim();
-                                    if(/^\d+$/.test(number))addPage(number);
-                                    else if(control.matches('.pager-next,[rel="next"]'))addPage(currentPage+1);
-                                    else if(control.matches('.pager-prev,[rel="prev"]')&&currentPage>1)addPage(currentPage-1);
-                                }
-                            }
-                            // Use explicit page totals only; a displayed "1" never implies a second page.
-                            const pagination=postData.pagination || bootstrap.pagination || {};
-                            const totalPages=Number(pagination.totalPages ?? pagination.pageCount ?? postData.pageCount ?? bootstrap.pageCount);
-                            if(Number.isSafeInteger(totalPages)&&totalPages>0&&totalPages<=100000){
-                                addPage(totalPages);
-                                for(let n=Math.max(1,currentPage-2);n<=Math.min(totalPages,currentPage+2);n++)addPage(n);
-                            }
-                            const knownPages=[...pages.keys()].sort((a,b)=>a-b);
-                            const pageButton = (page,label) => {const button=document.createElement('button');button.type='button';button.textContent=label;button.disabled=page===currentPage;if(button.disabled)button.setAttribute('aria-current','page');button.onclick=e=>{e.preventDefault();e.stopPropagation();load(`/post-${id}-${page}`);};nav.append(button);};
-                            if(currentPage>1)pageButton(currentPage-1,'上一页');
-                            for(const page of knownPages)pageButton(page,String(page));
-                            if(knownPages.some(page=>page>currentPage))pageButton(currentPage+1,'下一页');
-                            const original=document.createElement('a');original.href=url.href;original.target='_blank';original.rel='noopener noreferrer';original.innerHTML=`<span>打开原帖</span>${svgIcon("nsx-external", 12)}`;nav.append(original);
-                            state.url=url.href;state.loaded=true;status.textContent=`第 ${currentPage} 页 · 本页 ${comments.length} 条评论`;
-                        } catch(error) {
-                            if(generation!==state.generation||panel.hidden)return;
-                            status.textContent=controller.signal.aborted?'加载超时，请重试':error.message;
-                            nav.replaceChildren();const retry=document.createElement('button');retry.type='button';retry.textContent='重试';retry.onclick=()=>load(url.href);const original=document.createElement('a');original.href=url.href;original.target='_blank';original.rel='noopener noreferrer';original.innerHTML=`<span>打开原帖</span>${svgIcon("nsx-external", 12)}`;nav.append(retry,original);
-                        } finally { clearTimeout(timer);if(generation===state.generation)panel.removeAttribute('aria-busy'); }
-                    };
-                    toggle.onclick=e=>{e.preventDefault();e.stopPropagation();panel.hidden=!panel.hidden;toggle.textContent=panel.hidden?'打开预览':'关闭预览';toggle.setAttribute('aria-expanded',String(!panel.hidden));if(panel.hidden){state.generation++;state.controller?.abort();panel.removeAttribute('aria-busy');}else if(!state.loaded)load(state.url);};
-                };
-                const scan = root => { if(root.matches?.(rows))setup(root);root.querySelectorAll?.(rows).forEach(setup); };
-                scan(document);
-                const observer=new MutationObserver(records=>{for(const record of records)for(const node of record.addedNodes)if(node.nodeType===1&&!node.closest('.nsx-preview-panel'))scan(node);for(const [row,state]of states)if(!row.isConnected){state.controller?.abort();states.delete(row);}});
-                observer.observe(document.body,{childList:true,subtree:true});
-                window.addEventListener('pagehide',()=>{for(const state of states.values())state.controller?.abort();});
-            }
-        };
 
         /* ==========================================================================
            [ 辅助工具 ] - 楼层快捷回复 (挂载于评论菜单 引用/回复 后)
@@ -3108,7 +2964,6 @@
         }
 
         runModules([
-            visualPolish,
             nestedComments,
             quickComment,
             commentShortcut,
@@ -3120,7 +2975,6 @@
             instantPage,
             smoothScroll,
             blockPosts,
-            postPreview,
             userRelation,
             floorQuickReply
         ], ctx);
